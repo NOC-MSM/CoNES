@@ -168,6 +168,9 @@ From: ubuntu:18.04
 	cd scripts
 	./nemo_setup -x /nemo -w /nemo -s /nemo/singularity-nemo
 
+%runscript
+    echo "Container was executed $NOW"
+
 %labels
     Author c.wood@epcc.ed.ac.uk
     Version v0.0.1
