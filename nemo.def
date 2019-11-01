@@ -8,6 +8,7 @@ From: ubuntu:18.04
 # Last updated: 2019-10-31
 #
 #	Unresolved issues / future work:
+#		- significant testing needed - does OpenMPI version on Cirrus need to the same as version in this def file?
 #		- do we _need_ to (should we) run all available `make [check|test]` for dependencies?
 #		- did I waste a lot of time working out how to compile dependencies from source? (David H suggested that some apt binaries might work, despite my comment below!)
 #		- we could change the workflow of all of this by creating individual docker files of all the dependencies (with same base OS image, probably something minimal? alpine?),
