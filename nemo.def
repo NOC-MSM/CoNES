@@ -50,6 +50,7 @@ From: ubuntu:18.04
 					   locales \
 					   locales-all \
 					   liburi-perl \
+					   # build-essential # can't remember why I had this, but it's not needed - any advantage to installing anyway?
 					   python
 			
 	locale-gen en_US en_US.UTF-8
@@ -86,7 +87,7 @@ From: ubuntu:18.04
 
 	# compile zlib from source
 	mkdir /home/nemo/zlib && cd $_
-	ZDIR=/usr/local #/home/nemo/zlib/install
+	ZDIR=/usr/local
 	wget http://www.zlib.net/zlib-1.2.11.tar.xz
 	tar --xz -x -v -f zlib-1.2.11.tar.xz 
 	rm zlib-1.2.11.tar.xz
@@ -132,18 +133,8 @@ From: ubuntu:18.04
 	rm netcdf.tar.gz 
 	cd netcdf-c-4.7.1
 	NCDIR=/usr/local
-	#NCDIR=/home/nemo/netcdf/install
 	
-
-	#CC=/opt/openmpi-4.0.1/bin/mpicc FC=/opt/openmpi-4.0.1/bin/mpifort CPPFLAGS=-I${H5DIR}/include LDFLAGS=-L${H5DIR}/lib ./configure --disable-shared --enable-parallel-tests --prefix=${NCDIR}
-
-	#CC=/opt/openmpi-4.0.1/bin/mpicc FC=/opt/openmpi-4.0.1/bin/mpifort CPPFLAGS=-I${H5DIR}/include LDFLAGS="-L${H5DIR}/lib -L${ZDIR}/lib" ./configure --disable-shared --enable-parallel-tests --prefix=${NCDIR}
-	
-
 	CC=/opt/openmpi-4.0.1/install/bin/mpicc FC=/opt/openmpi-4.0.1/install/bin/mpifort CPPFLAGS=-I${H5DIR}/include LDFLAGS=-L${H5DIR}/lib ./configure --disable-shared --prefix=$NCDIR
-
-
-	
 	make
 	# make check fails; again - maybe we should avoid running it (only 1 response from a question on the netcdf mailing list, saying it is really finicky) 
 	# make check
@@ -156,15 +147,7 @@ From: ubuntu:18.04
 	rm v4.5.2.tar.gz
 	cd netcdf-fortran-4.5.2/
 	NFDIR=/usr/local
-	#NFDIR=/home/nemo/netcdf/install
-
-	#CPPFLAGS=-I${NCDIR}/include LDFLAGS=-L${NCDIR}/lib ./configure --prefix=${NFDIR}
-
-	#CC=/opt/openmpi-4.0.1/install/bin/mpicc FC=/opt/openmpi-4.0.1/install/bin/mpifort CPPFLAGS="-I${NCDIR}/include -I${H5DIR}/include" LDFLAGS="-L${NCDIR}/lib -L${H5DIR}/lib" ./configure --prefix=$NCDIR --disable-fortran-type-check
-
-
-
-
+	
 	CC=/opt/openmpi-4.0.1/install/bin/mpicc FC=/opt/openmpi-4.0.1/install/bin/mpifort CPPFLAGS=-I${NCDIR}/include LDFLAGS="-L${NCDIR}/lib" LIBS="-lhdf5 -lhdf5_hl -lcurl" ./configure --prefix=$NFDIR --disable-shared
 	make
 	make install
@@ -172,14 +155,6 @@ From: ubuntu:18.04
 	su nemo
 	WORK_DIR=/nemo
 	PATH=$PATH:/opt/openmpi-4.0.1/install/bin
-
-
-#	PATH=$PATH:/home/nemo/netcdf/install/bin
-#	PATH=$PATH:/home/nemo/netcdf/install/lib 
-#	PATH=$PATH:/home/nemo/netcdf/install/include 
-#	PATH=$PATH:/home/nemo/netcdf/install/share
-
-#	LD_LIBRARY_PATH=/home/nemo/netcdf/install/include:$LD_LIBRARY_PATH
 
 	# get singularity nemo
 	cd $WORK_DIR
@@ -193,69 +168,14 @@ From: ubuntu:18.04
 	cd scripts
 	./nemo_setup -x /nemo -w /nemo -s /nemo/singularity-nemo
 
-	# clean up
-	cd $WORK_DIR
-	rm -vf *.tar.*
-
-
-#hmm, arch=GCC_LINUX
-
-#./make_xios --full --prod --arch GCC_LINUX --netcdf_lib netcdf4_par --job 1
-
-
- - edit arch-linux_gfortran:
-
-%NCDF_HOME           /usr
-%HDF5_HOME           /usr/local
-%XIOS_HOME           /nemo/xios
-
-./makenemo -m linux_gfortran -r ORCA2_ICE_PISCES -j 1
-
-#sudo ln -s /usr/bin/make /usr/bin/gmake
-#sudo ln -s /usr/bin/mpicc /usr/bin/mpiicc
-#sudo ln -s /usr/share/openmpi/mpicc-wrapper-data.txt /usr/share/openmpi/mpiicc-wrapper-data.txt 
-
-#create copies of arch-cirrus* to arch-singularity
-#replace nofor-main with Wno-main
-#arch=singularity
-
-
-
-
-apt-get install build-essential
-
-
-	# install gfortran
-	#apt-get install -y gfortran g++
-
-	# install gcc
-#	apt-get install -y gcc
-
-	# install hdf5
-#	apt-get install -y libhdf5-dev
-
-
-#	apk update
-#	apk add subversion wget git
-#
-#	apk add gcc
-#
-#	apk add --no-cache \
-#            --allow-untrusted \
-#            --repository \
-#             http://dl-3.alpinelinux.org/alpine/edge/testing \
-#            hdf5 \
-#            hdf5-dev
-
-    git clone https://github.com/NOC-MSM/singularity-nemo
-	cd singularity-nemo/scripts
-	# ./nemo_setup -w /home/vagrant/ -x /home/vagrant -s /home/vagrant/singularity-nemo/
-	#./nemo_setup -w /nemo -x /nemo -s /nemo/singularity-nemo/
-
 %labels
     Author c.wood@epcc.ed.ac.uk
     Version v0.0.1
 
 %help
-    This is a demo container used to illustrate a def file that uses all
-    supported sections.
+    This definition file builds Nemo, XIOS, and the following dependencies from source:
+    	- zlib (1.2.11)
+    	- curl (7.66.0)
+    	- OpenMPI (4.0.1)
+    	- HDF5 (1.10.5)
+    	- NetCDF C (4.7.1) and Fortran (4.5.2) libraries 
