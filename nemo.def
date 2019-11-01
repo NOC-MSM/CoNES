@@ -36,10 +36,21 @@ From: ubuntu:18.04
 	##
 
 	# install basic stuff
+
+	##
+	# Although my original order worked when just testing the commands, when building as a container, I had locales and python errors (and the build was killed)
+	# unless I set locales[-all] separately and installed python first
+	##
+
 	apt-get install -y software-properties-common
 	add-apt-repository universe
 	apt-get update
-	apt-get install -y subversion \
+
+	apt-get install -y locales locales-all
+	locale-gen en_US en_US.UTF-8
+
+	apt-get install -y python \
+					   subversion \
 					   wget \
 					   git \
 					   make \
@@ -47,13 +58,10 @@ From: ubuntu:18.04
 					   gcc \
 					   gfortran \
 					   g++ \
-					   locales \
-					   locales-all \
 					   liburi-perl \
 					   # build-essential # can't remember why I had this, but it's not needed - any advantage to installing anyway?
-					   python
+					   
 			
-	locale-gen en_US en_US.UTF-8
 	ln -s /usr/bin/make /usr/bin/gmake
 
 	# compiling curl from source https://curl.haxx.se/docs/install.html
