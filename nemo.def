@@ -160,7 +160,12 @@ From: ubuntu:18.04
 	make
 	make install
 
-	su nemo
+	# Actually - when we build a container, everything in the container is the same as the user outside the container - since building needs sudo, then this will be root
+	# Changing to su nemo here has no effect
+
+	#su nemo
+
+
 	WORK_DIR=/nemo
 	PATH=$PATH:/opt/openmpi-4.0.1/install/bin
 
