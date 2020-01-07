@@ -123,6 +123,9 @@ From: ubuntu:18.04
 	# and add this symlink (for xios / nemo) - can't do ln as nemo user
 	ln -s /opt/openmpi-4.0.1/install/bin/mpif90 /usr/bin/mpif90
 
+	# and LD_LIBRARY_PATH
+	LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+
 	##
 	# hmm, maybe netCDF doesn't like anything being anywhere but /usr/local...
 	# but: I wanted to install hdf5 library locally because make check runs mpiexec, which complains if it's run as root
@@ -176,10 +179,10 @@ From: ubuntu:18.04
 	cd singularity-nemo
 
 	# dev branch
-	git checkout def-file-development
+	git checkout gyre_singularity
 
 	cd scripts
-	./nemo_setup -x /nemo -w /nemo -s /nemo/singularity-nemo
+	./nemo_setup_gyre -x /nemo -w /nemo -s /nemo/singularity-nemo
 
 %runscript
     echo "Container was executed $NOW"
