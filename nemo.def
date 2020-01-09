@@ -95,7 +95,7 @@ From: ubuntu:18.04
 
     # compile zlib from source
     mkdir /home/nemo/zlib && cd $_
-    ZDIR=/usr/local >> $SINGULARITY_ENVIRONMENT
+    ZDIR=/usr/local
     wget http://www.zlib.net/zlib-1.2.11.tar.xz
     tar --xz -x -v -f zlib-1.2.11.tar.xz 
     rm zlib-1.2.11.tar.xz
@@ -110,7 +110,7 @@ From: ubuntu:18.04
     wget -O hdf5.tar.gz "https://www.hdfgroup.org/package/hdf5-1-10-5-tar-gz/?wpdmdl=13571&refresh=5d94c86107ca21570031713"
     tar xzvf hdf5.tar.gz
     rm hdf5.tar.gz
-    H5DIR=/usr/local >> $SINGULARITY_ENVIRONMENT # /home/nemo/hdf5/install
+    H5DIR=/usr/local # /home/nemo/hdf5/install
     cd hdf5-1.10.5 
     # n.b. --enable-fortran specifically not needed (https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html#build_default)
     CC=/opt/openmpi-4.0.1/install/bin/mpicc ./configure --with-zlib=${ZDIR} --prefix=${H5DIR} --enable-hl --enable-parallel 
@@ -124,7 +124,7 @@ From: ubuntu:18.04
     ln -s /opt/openmpi-4.0.1/install/bin/mpif90 /usr/bin/mpif90
 
     # and LD_LIBRARY_PATH
-    LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH >> $SINGULARITY_ENVIRONMENT
+    LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
     ##
     # hmm, maybe netCDF doesn't like anything being anywhere but /usr/local...
@@ -143,7 +143,7 @@ From: ubuntu:18.04
     tar xzvf netcdf.tar.gz
     rm netcdf.tar.gz 
     cd netcdf-c-4.7.1
-    NCDIR=/usr/local >> $SINGULARITY_ENVIRONMENT
+    NCDIR=/usr/local
     
     CC=/opt/openmpi-4.0.1/install/bin/mpicc FC=/opt/openmpi-4.0.1/install/bin/mpifort CPPFLAGS=-I${H5DIR}/include LDFLAGS=-L${H5DIR}/lib ./configure --disable-shared --prefix=$NCDIR
     make
@@ -157,7 +157,7 @@ From: ubuntu:18.04
     tar xzvf v4.5.2.tar.gz
     rm v4.5.2.tar.gz
     cd netcdf-fortran-4.5.2/
-    NFDIR=/usr/local >> $SINGULARITY_ENVIRONMENT
+    NFDIR=/usr/local
     
     CC=/opt/openmpi-4.0.1/install/bin/mpicc FC=/opt/openmpi-4.0.1/install/bin/mpifort CPPFLAGS=-I${NCDIR}/include LDFLAGS="-L${NCDIR}/lib" LIBS="-lhdf5 -lhdf5_hl -lcurl" ./configure --prefix=$NFDIR --disable-shared
     make
@@ -168,9 +168,8 @@ From: ubuntu:18.04
 
     #su nemo
 
-
     # WORK_DIR=/nemo >> $SINGULARITY_ENVIRONMENT # superfluous...
-    PATH=$PATH:/opt/openmpi-4.0.1/install/bin >> $SINGULARITY_ENVIRONMENT
+    PATH=$PATH:/opt/openmpi-4.0.1/install/bin
 
     # get singularity nemo
     cd $WORK_DIR
@@ -184,6 +183,16 @@ From: ubuntu:18.04
 
     cd scripts
     ./nemo_setup_gyre -x /nemo -w /nemo -s /nemo/singularity-nemo
+
+%environment
+    
+    export ZDIR=/usr/local
+    export NCDIR=/usr/local
+    export NFDIR=/usr/local
+    export WORK_DIR=/nemo
+    export H5DIR=/usr/local
+    export PATH=$PATH:/opt/openmpi-4.0.1/install/bin
+    export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
 %runscript
     
