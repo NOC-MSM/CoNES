@@ -3,188 +3,193 @@ From: ubuntu:18.04
 
 ####
 #
-# Author: 		Chris Wood, EPCC, University of Edinburgh <c.wood@epcc.ed.ac.uk>
-# Date: 		2019-09-06
-# Last updated: 2019-10-31
+# Authors:      Chris Wood, EPCC, University of Edinburgh <c.wood@epcc.ed.ac.uk>; James Harle, National Oceanography Centre <jdha@noc.ac.uk>
+# Date:         2019-09-06
+# Last updated: 2020-01-07
 #
-#	Unresolved issues / future work:
-#		- significant testing needed - does OpenMPI version on Cirrus need to the same as version in this def file?
-#		- do we _need_ to (should we) run all available `make [check|test]` for dependencies?
-#		- did I waste a lot of time working out how to compile dependencies from source? (David H suggested that some apt binaries might work, despite my comment below!)
-#		- we could change the workflow of all of this by creating individual docker files of all the dependencies (with same base OS image, probably something minimal? alpine?),
-#		  doing a multistage build, and creating the singularity container from the final resultant docker container. Singularity doensn't (yet) allow multistage builds
-#		- one of the issues I had running `make check` for hdf5 was with running it as root - mpiexec complains about this. I created the nemo user to run (with the side effect that
-#		  it created a useful location - the home directory - to store some of the dependencies!). But I then had issues with adding the hdf5 libraries to search paths used by NetCDF, nemo, and xios,
-#		  so changed --prefix from /home/nemo/hdf5 to /usr/local, but you can't install stuff to there without being root (or sudo, which isn't directly supported in a container). Way round it would be
-#		  build in /home/nemo as nemo, then install as root, and switch back to nemo user? Is it worth it? But only need to worry about this if we want to run `make check`. Also had similar issues with
-#		  NCDIR and NFDIR for NetCDF install directories (changed from /home/nemo/netcdf/install to /usr/local). If there's a way round it (and there's a reason to do it), then LD_LIBRARY_PATH and PATH
-#		  will need to be set and updated
+#   Unresolved issues / future work:
+#       - significant testing needed - does OpenMPI version on Cirrus need to the same as version in this def file?
+#       - do we _need_ to (should we) run all available `make [check|test]` for dependencies?
+#       - did I waste a lot of time working out how to compile dependencies from source? (David H suggested that some apt binaries might work, despite my comment below!)
+#       - we could change the workflow of all of this by creating individual docker files of all the dependencies (with same base OS image, probably something minimal? alpine?),
+#         doing a multistage build, and creating the singularity container from the final resultant docker container. Singularity doensn't (yet) allow multistage builds
+#       - one of the issues I had running `make check` for hdf5 was with running it as root - mpiexec complains about this. I created the nemo user to run (with the side effect that
+#         it created a useful location - the home directory - to store some of the dependencies!). But I then had issues with adding the hdf5 libraries to search paths used by NetCDF, nemo, and xios,
+#         so changed --prefix from /home/nemo/hdf5 to /usr/local, but you can't install stuff to there without being root (or sudo, which isn't directly supported in a container). Way round it would be
+#         build in /home/nemo as nemo, then install as root, and switch back to nemo user? Is it worth it? But only need to worry about this if we want to run `make check`. Also had similar issues with
+#         NCDIR and NFDIR for NetCDF install directories (changed from /home/nemo/netcdf/install to /usr/local). If there's a way round it (and there's a reason to do it), then LD_LIBRARY_PATH and PATH
+#         will need to be set and updated
 #
-#		  I also thought it would be useful to keep all the 3rd party dependencies in a separate place, rather than /usr/local, but maybe that's just being a bit OCD...
-#		- the nemo-singularity repo is currently private, so need to supply a username/password
-#		- I keep the def file in a different repo to the singularity nemo build because	it is a different thing - someone running `singularity build` doesn't need the whole singularity-nemo repo (apart from
-#		  inside the container)	
+#         I also thought it would be useful to keep all the 3rd party dependencies in a separate place, rather than /usr/local, but maybe that's just being a bit OCD...
+#       - the nemo-singularity repo is currently private, so need to supply a username/password
+#       - I keep the def file in a different repo to the singularity nemo build because it is a different thing - someone running `singularity build` doesn't need the whole singularity-nemo repo (apart from
+#         inside the container) 
 #
-#		- note I currently change branch in the nemo singularity repo rather than use master
+#       - note I currently change branch in the nemo singularity repo rather than use master
 ####
 
 %post
 
-	##
-	# Compilation from source necessary where apt-get binaries weren't compiled with necessary dependencies
-	# for XIOS and NEMO
-	##
+    ##
+    # Compilation from source necessary where apt-get binaries weren't compiled with necessary dependencies
+    # for XIOS and NEMO
+    ##
 
-	# install basic stuff
+    # install basic stuff
 
-	##
-	# Although my original order worked when just testing the commands, when building as a container, I had locales and python errors (and the build was killed)
-	# unless I set locales[-all] separately and installed python first
-	##
+    ##
+    # Although my original order worked when just testing the commands, when building as a container, I had locales and python errors (and the build was killed)
+    # unless I set locales[-all] separately and installed python first
+    ##
 
-	apt-get install -y software-properties-common
-	add-apt-repository universe
-	apt-get update
+    apt-get install -y software-properties-common
+    add-apt-repository universe
+    apt-get update
 
-	apt-get install -y locales locales-all
-	locale-gen en_US en_US.UTF-8
+    apt-get install -y locales locales-all
+    locale-gen en_US en_US.UTF-8
 
-	apt-get install -y python \
-					   subversion \
-					   wget \
-					   git \
-					   make \
-					   m4 \
-					   gcc \
-					   gfortran \
-					   g++ \
-					   liburi-perl \
-					   # build-essential # can't remember why I had this, but it's not needed - any advantage to installing anyway?
-					   
-			
-	ln -s /usr/bin/make /usr/bin/gmake
+    apt-get install -y python \
+                       subversion \
+                       wget \
+                       git \
+                       make \
+                       m4 \
+                       gcc \
+                       gfortran \
+                       g++ \
+                       liburi-perl \
+                       # build-essential # can't remember why I had this, but it's not needed - any advantage to installing anyway?
+                       
+            
+    ln -s /usr/bin/make /usr/bin/gmake
 
-	# compiling curl from source https://curl.haxx.se/docs/install.html
-	mkdir -p /opt/curl && cd $_
-	wget https://curl.haxx.se/download/curl-7.66.0.tar.gz
-	tar xvzf curl-7.66.0.tar.gz
-	rm curl-7.66.0.tar.gz
-	cd curl-7.66.0
-	./configure
-	make
-	make test
-	make install
+    # compiling curl from source https://curl.haxx.se/docs/install.html
+    mkdir -p /opt/curl && cd $_
+    wget https://curl.haxx.se/download/curl-7.66.0.tar.gz
+    tar xvzf curl-7.66.0.tar.gz
+    rm curl-7.66.0.tar.gz
+    cd curl-7.66.0
+    ./configure
+    make
+    make test
+    make install
 
-	# compiling openmpi from source
-	mkdir -p /opt/openmpi-4.0.1 && cd $_
-	wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.1.tar.gz
-	tar -xvzf openmpi-4.0.1.tar.gz
-	rm openmpi-4.0.1.tar.gz
-	cd openmpi-4.0.1
-	./configure CC=gcc CXX=g++ FC=gfortran --enable-mpi1-compatibility --prefix=/opt/openmpi-4.0.1/install
-	make
-	make install
+    # compiling openmpi from source
+    mkdir -p /opt/openmpi-4.0.1 && cd $_
+    wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.1.tar.gz
+    tar -xvzf openmpi-4.0.1.tar.gz
+    rm openmpi-4.0.1.tar.gz
+    cd openmpi-4.0.1
+    ./configure CC=gcc CXX=g++ FC=gfortran --enable-mpi1-compatibility --prefix=/opt/openmpi-4.0.1/install
+    make
+    make install
 
-	# add user `nemo` - mpiexec in hdf5 `make check` complains if run as root (although we might end up not running make check)
-	adduser --disabled-password --gecos "" nemo
+    # add user `nemo` - mpiexec in hdf5 `make check` complains if run as root (although we might end up not running make check)
+    adduser --disabled-password --gecos "" nemo
 
-	WORK_DIR=/nemo
-	mkdir $WORK_DIR
-	chown nemo:nemo -R $WORK_DIR
-	cd $WORK_DIR
+    WORK_DIR=/nemo >> $SINGULARITY_ENVIRONMENT
+    mkdir $WORK_DIR
+    chown nemo:nemo -R $WORK_DIR
+    cd $WORK_DIR
 
-	# compile zlib from source
-	mkdir /home/nemo/zlib && cd $_
-	ZDIR=/usr/local
-	wget http://www.zlib.net/zlib-1.2.11.tar.xz
-	tar --xz -x -v -f zlib-1.2.11.tar.xz 
-	rm zlib-1.2.11.tar.xz
-	cd zlib-1.2.11
-	./configure --prefix=${ZDIR}
-	make
-	make check
-	make install
+    # compile zlib from source
+    mkdir /home/nemo/zlib && cd $_
+    ZDIR=/usr/local >> $SINGULARITY_ENVIRONMENT
+    wget http://www.zlib.net/zlib-1.2.11.tar.xz
+    tar --xz -x -v -f zlib-1.2.11.tar.xz 
+    rm zlib-1.2.11.tar.xz
+    cd zlib-1.2.11
+    ./configure --prefix=${ZDIR}
+    make
+    make check
+    make install
 
-	# compile HDF5 libraries
-	mkdir /home/nemo/hdf5 && cd $_
-	wget -O hdf5.tar.gz "https://www.hdfgroup.org/package/hdf5-1-10-5-tar-gz/?wpdmdl=13571&refresh=5d94c86107ca21570031713"
-	tar xzvf hdf5.tar.gz
-	rm hdf5.tar.gz
-	H5DIR=/usr/local # /home/nemo/hdf5/install
-	cd hdf5-1.10.5 
-	# n.b. --enable-fortran specifically not needed (https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html#build_default)
-	CC=/opt/openmpi-4.0.1/install/bin/mpicc ./configure --with-zlib=${ZDIR} --prefix=${H5DIR} --enable-hl --enable-parallel 
-	make
-	# maybe we shouldn't bother with make check - it complains about a lot and we're not actually building on a parallel file system
-	# so some of the checks are totally irrelevant
-	# make check -i RUNPARALLEL='-oversubscribe'
-	make install
+    # compile HDF5 libraries
+    mkdir /home/nemo/hdf5 && cd $_
+    wget -O hdf5.tar.gz "https://www.hdfgroup.org/package/hdf5-1-10-5-tar-gz/?wpdmdl=13571&refresh=5d94c86107ca21570031713"
+    tar xzvf hdf5.tar.gz
+    rm hdf5.tar.gz
+    H5DIR=/usr/local >> $SINGULARITY_ENVIRONMENT # /home/nemo/hdf5/install
+    cd hdf5-1.10.5 
+    # n.b. --enable-fortran specifically not needed (https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html#build_default)
+    CC=/opt/openmpi-4.0.1/install/bin/mpicc ./configure --with-zlib=${ZDIR} --prefix=${H5DIR} --enable-hl --enable-parallel 
+    make
+    # maybe we shouldn't bother with make check - it complains about a lot and we're not actually building on a parallel file system
+    # so some of the checks are totally irrelevant
+    # make check -i RUNPARALLEL='-oversubscribe'
+    make install
 
-	# and add this symlink (for xios / nemo) - can't do ln as nemo user
-	ln -s /opt/openmpi-4.0.1/install/bin/mpif90 /usr/bin/mpif90
+    # and add this symlink (for xios / nemo) - can't do ln as nemo user
+    ln -s /opt/openmpi-4.0.1/install/bin/mpif90 /usr/bin/mpif90
 
-	# and LD_LIBRARY_PATH
-	LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+    # and LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH >> $SINGULARITY_ENVIRONMENT
 
-	##
-	# hmm, maybe netCDF doesn't like anything being anywhere but /usr/local...
-	# but: I wanted to install hdf5 library locally because make check runs mpiexec, which complains if it's run as root
-	# ... but non-root can't install to /usr/local?
-	##
+    ##
+    # hmm, maybe netCDF doesn't like anything being anywhere but /usr/local...
+    # but: I wanted to install hdf5 library locally because make check runs mpiexec, which complains if it's run as root
+    # ... but non-root can't install to /usr/local?
+    ##
 
-	##
-	# I originally had NCDIR and NFDIR as /home/nemo/netcdf/install but even adding this to PATH and LD_LIBRARY_LINK
-	##
+    ##
+    # I originally had NCDIR and NFDIR as /home/nemo/netcdf/install but even adding this to PATH and LD_LIBRARY_LINK
+    ##
 
-	# compile NetCDF libs
-	mkdir -p /home/nemo/netcdf && cd $_
-	#cd $WORK_DIR
-	wget -O netcdf.tar.gz https://github.com/Unidata/netcdf-c/archive/v4.7.1.tar.gz
-	tar xzvf netcdf.tar.gz
-	rm netcdf.tar.gz 
-	cd netcdf-c-4.7.1
-	NCDIR=/usr/local
-	
-	CC=/opt/openmpi-4.0.1/install/bin/mpicc FC=/opt/openmpi-4.0.1/install/bin/mpifort CPPFLAGS=-I${H5DIR}/include LDFLAGS=-L${H5DIR}/lib ./configure --disable-shared --prefix=$NCDIR
-	make
-	# make check fails; again - maybe we should avoid running it (only 1 response from a question on the netcdf mailing list, saying it is really finicky) 
-	# make check
-	make install
+    # compile NetCDF libs
+    mkdir -p /home/nemo/netcdf && cd $_
+    #cd $WORK_DIR
+    wget -O netcdf.tar.gz https://github.com/Unidata/netcdf-c/archive/v4.7.1.tar.gz
+    tar xzvf netcdf.tar.gz
+    rm netcdf.tar.gz 
+    cd netcdf-c-4.7.1
+    NCDIR=/usr/local >> $SINGULARITY_ENVIRONMENT
+    
+    CC=/opt/openmpi-4.0.1/install/bin/mpicc FC=/opt/openmpi-4.0.1/install/bin/mpifort CPPFLAGS=-I${H5DIR}/include LDFLAGS=-L${H5DIR}/lib ./configure --disable-shared --prefix=$NCDIR
+    make
+    # make check fails; again - maybe we should avoid running it (only 1 response from a question on the netcdf mailing list, saying it is really finicky) 
+    # make check
+    make install
 
-	## and the fortran libraries
-	cd ..
-	wget https://github.com/Unidata/netcdf-fortran/archive/v4.5.2.tar.gz
-	tar xzvf v4.5.2.tar.gz
-	rm v4.5.2.tar.gz
-	cd netcdf-fortran-4.5.2/
-	NFDIR=/usr/local
-	
-	CC=/opt/openmpi-4.0.1/install/bin/mpicc FC=/opt/openmpi-4.0.1/install/bin/mpifort CPPFLAGS=-I${NCDIR}/include LDFLAGS="-L${NCDIR}/lib" LIBS="-lhdf5 -lhdf5_hl -lcurl" ./configure --prefix=$NFDIR --disable-shared
-	make
-	make install
+    ## and the fortran libraries
+    cd ..
+    wget https://github.com/Unidata/netcdf-fortran/archive/v4.5.2.tar.gz
+    tar xzvf v4.5.2.tar.gz
+    rm v4.5.2.tar.gz
+    cd netcdf-fortran-4.5.2/
+    NFDIR=/usr/local >> $SINGULARITY_ENVIRONMENT
+    
+    CC=/opt/openmpi-4.0.1/install/bin/mpicc FC=/opt/openmpi-4.0.1/install/bin/mpifort CPPFLAGS=-I${NCDIR}/include LDFLAGS="-L${NCDIR}/lib" LIBS="-lhdf5 -lhdf5_hl -lcurl" ./configure --prefix=$NFDIR --disable-shared
+    make
+    make install
 
-	# Actually - when we build a container, everything in the container is the same as the user outside the container - since building needs sudo, then this will be root
-	# Changing to su nemo here has no effect
+    # Actually - when we build a container, everything in the container is the same as the user outside the container - since building needs sudo, then this will be root
+    # Changing to su nemo here has no effect
 
-	#su nemo
+    #su nemo
 
 
-	WORK_DIR=/nemo
-	PATH=$PATH:/opt/openmpi-4.0.1/install/bin
+    # WORK_DIR=/nemo >> $SINGULARITY_ENVIRONMENT # superfluous...
+    PATH=$PATH:/opt/openmpi-4.0.1/install/bin >> $SINGULARITY_ENVIRONMENT
 
-	# get singularity nemo
-	cd $WORK_DIR
-	# this asks for username & password...
-	git clone https://github.com/NOC-MSM/singularity-nemo
-	cd singularity-nemo
+    # get singularity nemo
+    cd $WORK_DIR
 
-	# dev branch
-	git checkout gyre_singularity
+    # this asks for username & password...
+    git clone https://github.com/NOC-MSM/singularity-nemo
+    cd singularity-nemo
 
-	cd scripts
-	./nemo_setup_gyre -x /nemo -w /nemo -s /nemo/singularity-nemo
+    # dev branch
+    git checkout gyre_singularity
+
+    cd scripts
+    ./nemo_setup_gyre -x /nemo -w /nemo -s /nemo/singularity-nemo
 
 %runscript
+    
+    echo `printenv`
+
+    NOW=`date`
     echo "Container was executed $NOW"
 
 %labels
@@ -192,9 +197,11 @@ From: ubuntu:18.04
     Version v0.0.1
 
 %help
-    This definition file builds Nemo, XIOS, and the following dependencies from source:
-    	- zlib (1.2.11)
-    	- curl (7.66.0)
-    	- OpenMPI (4.0.1)
-    	- HDF5 (1.10.5)
-    	- NetCDF C (4.7.1) and Fortran (4.5.2) libraries 
+    The definition file used to create this container builds NEMO, XIOS, and the following dependencies from source:
+        - zlib (1.2.11)
+        - curl (7.66.0)
+        - OpenMPI (4.0.1)
+        - HDF5 (1.10.5)
+        - NetCDF C (4.7.1) and Fortran (4.5.2) libraries 
+
+    # expand to include NEMO and XIOS versions
