@@ -1,0 +1,39 @@
+Bootstrap: library
+From: ubuntu:18.04
+
+%post
+
+    mkdir -p /opt/openmpi-4.0.1/install/bin
+    PATH=$PATH:/opt/openmpi-4.0.1/install/bin >> $SINGULARITY_ENVIRONMENT
+
+%environment
+
+    export HELLO=WORLD
+    HELLO3=WORLD3
+    export HELLO3
+
+%runscript
+    
+    export HELLO2=WORLD2
+    
+    echo $HELLO
+    echo $HELLO2
+
+    echo $LD_LIBRARY_PATH
+
+    NOW=`date`
+    echo "Container was executed $NOW"
+
+%labels
+    Author c.wood@epcc.ed.ac.uk
+    Version v0.0.1
+
+%help
+    The definition file used to create this container builds NEMO, XIOS, and the following dependencies from source:
+        - zlib (1.2.11)
+        - curl (7.66.0)
+        - OpenMPI (4.0.1)
+        - HDF5 (1.10.5)
+        - NetCDF C (4.7.1) and Fortran (4.5.2) libraries 
+
+    # expand to include NEMO and XIOS versions
