@@ -62,6 +62,10 @@ From: ubuntu:18.04
                        # build-essential # can't remember why I had this, but it's not needed - any advantage to installing anyway?
                        
             
+    ###
+    # softlink gmake to make
+    ###
+
     ln -s /usr/bin/make /usr/bin/gmake
 
     # compiling curl from source https://curl.haxx.se/docs/install.html
@@ -174,8 +178,8 @@ From: ubuntu:18.04
     # get singularity nemo
     cd $WORK_DIR
 
-    # this asks for username & password...
-    git clone https://github.com/NOC-MSM/singularity-nemo
+    # this asks for username & password is SSH access is not setup...
+    git clone https://github.com/NOC-MSM/singularity-nemo # git@github.com:NOC-MSM/singularity-nemo.git
     cd singularity-nemo
 
     # dev branch
@@ -184,6 +188,9 @@ From: ubuntu:18.04
     cd scripts
     ./nemo_setup_gyre -x /nemo -w /nemo -s /nemo/singularity-nemo
 
+    chown -Rv nemo:nemo /nemo
+    chmod -Rv 777 /nemo
+
 %environment
     
     export ZDIR=/usr/local
@@ -191,7 +198,7 @@ From: ubuntu:18.04
     export NFDIR=/usr/local
     export WORK_DIR=/nemo
     export H5DIR=/usr/local
-    export PATH=$PATH:/opt/openmpi-4.0.1/install/bin
+    export PATH=$PATH:/opt/openmpi-4.0.1/install/bin:/usr/local
     export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
 %runscript
@@ -213,4 +220,4 @@ From: ubuntu:18.04
         - HDF5 (1.10.5)
         - NetCDF C (4.7.1) and Fortran (4.5.2) libraries 
 
-    # expand to include NEMO and XIOS versions
+    # expand to include NEMO and XIOS versions  
