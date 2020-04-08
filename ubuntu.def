@@ -1,0 +1,15 @@
+Bootstrap: library
+From: ubuntu:18.04
+
+%labels
+    Author c.wood@epcc.ed.ac.uk
+    Version v0.0.1
+
+%runscript
+    NOW=`date` 
+    echo "Hello World\n"
+    echo $NOW
+
+%help
+    This is a demo container used to illustrate a def file that uses all
+    supported sections.
