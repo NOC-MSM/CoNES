@@ -8,6 +8,7 @@ From: ubuntu:18.04
 	mkdir /testnemo
 	echo "Some test results" >> /testnemo/nemo_results.txt
 	chown -R nemo:nemo /testnemo
+	chmod -R 777 /testnemo
 
 %labels
     Author c.wood@epcc.ed.ac.uk
