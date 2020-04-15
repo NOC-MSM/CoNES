@@ -2,9 +2,12 @@ Bootstrap: library
 From: ubuntu:18.04
 
 %post
+	
+	adduser --disabled-password --gecos "" nemo
+
 	mkdir /testnemo
 	echo "Some test results" >> /testnemo/nemo_results.txt
-	chown -R 758400011:758400011 /testnemo
+	chown -R nemo:nemo /testnemo
 
 %labels
     Author c.wood@epcc.ed.ac.uk
