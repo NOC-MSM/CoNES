@@ -5,13 +5,13 @@ From: ubuntu:18.04
 
     apt-get install -y python \
                        wget
-	
-	adduser --disabled-password --gecos "" nemo
+    
+    adduser --disabled-password --gecos "" nemo
 
-	mkdir /testnemo && cd $_
+    mkdir /testnemo && cd $_
     wget https://raw.githubusercontent.com/wood-chris/singularity-nemo-def/master/test_writeable.py
-	chown -R nemo:nemo /testnemo
-	chmod -R 777 /testnemo
+    chown -R nemo:nemo /testnemo
+    chmod -R 777 /testnemo
 
 %labels
     Author c.wood@epcc.ed.ac.uk
