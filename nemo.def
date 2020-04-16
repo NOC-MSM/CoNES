@@ -60,6 +60,8 @@ From: ubuntu:18.04
                        gfortran \
                        g++ \
                        liburi-perl \
+                       libcurl4-openssl-dev \
+                       curl \
                        # build-essential # can't remember why I had this, but it's not needed - any advantage to installing anyway?
                        
     # check what these were for:
@@ -70,17 +72,6 @@ From: ubuntu:18.04
     ###
 
     ln -s /usr/bin/make /usr/bin/gmake
-
-    # compiling curl from source https://curl.haxx.se/docs/install.html
-    mkdir -p /opt/curl && cd $_
-    wget https://curl.haxx.se/download/curl-7.66.0.tar.gz
-    tar xvzf curl-7.66.0.tar.gz
-    rm curl-7.66.0.tar.gz
-    cd curl-7.66.0
-    ./configure
-    make
-    make test
-    make install
 
     # compiling openmpi from source
     mkdir -p /opt/openmpi-4.0.1 && cd $_
