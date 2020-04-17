@@ -60,11 +60,11 @@ From: ubuntu:18.04
                        gfortran \
                        g++ \
                        liburi-perl \
-                       libcurl4-openssl-dev \
-                       curl \
+                       libcurl4-openssl-dev \ # also installs libcurl4
+                       curl \ 
                        # build-essential # can't remember why I had this, but it's not needed - any advantage to installing anyway?
                        
-    # check what these were for:
+    # these were dependencies that Michael Bareford installed in his example Singularity container - do we need them? (https://www.wiki.ed.ac.uk/display/EPCC/Building+a+Container)
     #    apt-get install -y build-essential uuid-dev libssl-dev libseccomp-dev libgpgme11-dev iputils-ping squashfs-tools wget git pkg-config m4 gfortran zlib1g-dev vim-tiny bc libibverbs-dev
             
     ###
@@ -74,7 +74,7 @@ From: ubuntu:18.04
     ln -s /usr/bin/make /usr/bin/gmake
 
     # compiling openmpi from source
-    mkdir -p /opt/openmpi-4.0.1 && cd $_
+    mkdir -p /opt/openmpi-4.0.1
     wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.1.tar.gz
     tar -xvzf openmpi-4.0.1.tar.gz
     rm openmpi-4.0.1.tar.gz
@@ -92,7 +92,7 @@ From: ubuntu:18.04
     cd $WORK_DIR
 
     # compile zlib from source
-    mkdir /home/nemo/zlib && cd $_
+    mkdir /home/nemo/zlib
     ZDIR=/usr/local
     wget http://www.zlib.net/zlib-1.2.11.tar.xz
     tar --xz -x -v -f zlib-1.2.11.tar.xz 
@@ -104,7 +104,7 @@ From: ubuntu:18.04
     make install
 
     # compile HDF5 libraries
-    mkdir /home/nemo/hdf5 && cd $_
+    mkdir /home/nemo/hdf5
     wget -O hdf5.tar.gz "https://www.hdfgroup.org/package/hdf5-1-10-5-tar-gz/?wpdmdl=13571&refresh=5d94c86107ca21570031713"
     tar xzvf hdf5.tar.gz
     rm hdf5.tar.gz
@@ -135,7 +135,7 @@ From: ubuntu:18.04
     ##
 
     # compile NetCDF libs
-    mkdir -p /home/nemo/netcdf && cd $_
+    mkdir -p /home/nemo/netcdf
     #cd $WORK_DIR
     wget -O netcdf.tar.gz https://github.com/Unidata/netcdf-c/archive/v4.7.1.tar.gz
     tar xzvf netcdf.tar.gz
@@ -150,7 +150,6 @@ From: ubuntu:18.04
     make install
 
     ## and the fortran libraries
-    cd ..
     wget https://github.com/Unidata/netcdf-fortran/archive/v4.5.2.tar.gz
     tar xzvf v4.5.2.tar.gz
     rm v4.5.2.tar.gz
