@@ -49,7 +49,7 @@ From: ubuntu:18.04
     add-apt-repository universe
     apt-get update
 
-
+    # n.b. libcurl4-openssl-dev also installs libcurl4 (as does crl, if not already installed)
     apt-get install -y python \
                        subversion \
                        wget \
@@ -60,7 +60,7 @@ From: ubuntu:18.04
                        gfortran \
                        g++ \
                        liburi-perl \
-                       libcurl4-openssl-dev \ # also installs libcurl4
+                       libcurl4-openssl-dev \ 
                        curl \ 
                        # build-essential # can't remember why I had this, but it's not needed - any advantage to installing anyway?
                        
