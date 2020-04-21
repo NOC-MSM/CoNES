@@ -98,26 +98,13 @@ From: ubuntu:18.04
     chown nemo:nemo -R $WORK_DIR
     cd $WORK_DIR
 
-    # compile zlib from source
-#    mkdir -p /opt/zlib # mkdir /home/nemo/zlib
-#    ZDIR=/opt/zlib/install # ZDIR=/usr/local
-#    cd /opt/zlib
-#    wget http://www.zlib.net/zlib-1.2.11.tar.xz
-#    tar --xz -x -v -f zlib-1.2.11.tar.xz 
-#    rm zlib-1.2.11.tar.xz
-#    cd zlib-1.2.11
-#    ./configure --prefix=${ZDIR}
-#    make
-#    make check
-#    make install
-
     # compile HDF5 libraries
-    mkdir -p /opt/hdf5 # mkdir /home/nemo/hdf5
+    mkdir -p /opt/hdf5
     cd /opt/hdf5
     wget -O hdf5.tar.gz "https://www.hdfgroup.org/package/hdf5-1-10-5-tar-gz/?wpdmdl=13571&refresh=5d94c86107ca21570031713"
     tar xzvf hdf5.tar.gz
     rm hdf5.tar.gz
-    H5DIR=/opt/hdf5/install # /usr/local # /home/nemo/hdf5/install
+    H5DIR=/opt/hdf5/install
     cd hdf5-1.10.5 
     # n.b. --enable-fortran specifically not needed (https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html#build_default)
     CC=/opt/openmpi-4.0.1/install/bin/mpicc ./configure --prefix=${H5DIR} --enable-hl --enable-parallel 
@@ -143,18 +130,18 @@ From: ubuntu:18.04
     ##
 
     ##
-    # FIXED! (I think) ... I originally had NCDIR and NFDIR as /home/nemo/netcdf/install but even adding this to PATH and LD_LIBRARY_LINK d
+    # FIXED! (I think) ... I originally had NCDIR and NFDIR as /home/nemo/netcdf/install but even adding this to PATH and LD_LIBRARY_LINK didn't seem to work
     ##
 
     # compile NetCDF libs
-    mkdir -p /opt/netcdf # mkdir -p /home/nemo/netcdf
+    mkdir -p /opt/netcdf
     #cd $WORK_DIR
     cd /opt/netcdf
     wget -O netcdf.tar.gz https://github.com/Unidata/netcdf-c/archive/v4.7.1.tar.gz
     tar xzvf netcdf.tar.gz
     rm netcdf.tar.gz 
     cd netcdf-c-4.7.1
-    NCDIR=/opt/netcdf/install #/usr/local
+    NCDIR=/opt/netcdf/install
     
     CC=/opt/openmpi-4.0.1/install/bin/mpicc FC=/opt/openmpi-4.0.1/install/bin/mpifort CPPFLAGS="-I${H5DIR}/include" LDFLAGS="-L${H5DIR}/lib" ./configure --disable-shared --prefix=$NCDIR
     make
@@ -169,7 +156,7 @@ From: ubuntu:18.04
     tar xzvf v4.5.2.tar.gz
     rm v4.5.2.tar.gz
     cd netcdf-fortran-4.5.2/
-    NFDIR=/opt/netcdf/install #/usr/local
+    NFDIR=/opt/netcdf/install
     
     CC=/opt/openmpi-4.0.1/install/bin/mpicc FC=/opt/openmpi-4.0.1/install/bin/mpifort CPPFLAGS="-I${NCDIR}/include -I${H5DIR}/include" LDFLAGS="-L${NCDIR}/lib -L${H5DIR}/lib" LIBS="-lhdf5 -lhdf5_hl -lcurl" ./configure --prefix=$NFDIR --disable-shared
     make
@@ -177,15 +164,13 @@ From: ubuntu:18.04
     cd ..
     rm -r netcdf-fortran-4.5.2 # removes the 18 mb directory
 
-    # Actually - when we build a container, everything in the container is the same as the user outside the container - since building needs sudo, then this will be root
-    # Changing to su nemo here has no effect
-
-    #su nemo
-
-    # WORK_DIR=/nemo >> $SINGULARITY_ENVIRONMENT # superfluous...
+    # this is needed for the NEMO and XIOS build scripts 
     PATH=$PATH:/opt/openmpi-4.0.1/install/bin
 
-    # get singularity nemo
+    ##
+    # Now we can install NEMO
+    ##
+
     cd $WORK_DIR
 
     # this asks for username & password if SSH access is not setup...
@@ -226,7 +211,6 @@ From: ubuntu:18.04
 
 %help
     The definition file used to create this container builds NEMO, XIOS, and the following dependencies from source:
-        - curl (7.66.0)
         - OpenMPI (4.0.1)
         - HDF5 (1.10.5)
         - NetCDF C (4.7.1) and Fortran (4.5.2) libraries 
