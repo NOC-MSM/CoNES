@@ -104,19 +104,6 @@ From: ubuntu:18.04
     chown nemo:nemo -R $WORK_DIR
     cd $WORK_DIR
 
-    # compile zlib from source
-#    mkdir -p /opt/zlib # mkdir /home/nemo/zlib
-#    ZDIR=/opt/zlib/install # ZDIR=/usr/local
-#    cd /opt/zlib
-#    wget http://www.zlib.net/zlib-1.2.11.tar.xz
-#    tar --xz -x -v -f zlib-1.2.11.tar.xz 
-#    rm zlib-1.2.11.tar.xz
-#    cd zlib-1.2.11
-#    ./configure --prefix=${ZDIR}
-#    make
-#    make check
-#    make install
-
     # compile HDF5 libraries
     mkdir -p /opt/hdf5 && cd $_ # mkdir /home/nemo/hdf5
     #cd /opt/hdf5
@@ -149,7 +136,7 @@ From: ubuntu:18.04
     ##
 
     ##
-    # FIXED! (I think) ... I originally had NCDIR and NFDIR as /home/nemo/netcdf/install but even adding this to PATH and LD_LIBRARY_LINK d
+    # FIXED! (I think) ... I originally had NCDIR and NFDIR as /home/nemo/netcdf/install but even adding this to PATH and LD_LIBRARY_LINK didn't seem to work
     ##
 
     # compile NetCDF libs
@@ -191,8 +178,13 @@ From: ubuntu:18.04
 
     # WORK_DIR=/nemo >> $SINGULARITY_ENVIRONMENT # superfluous...
     PATH=$PATH:/opt/openmpi-2.0.1/install/bin:/opt/hdf5/install/bin
+    # this is needed for the NEMO and XIOS build scripts 
+    #PATH=$PATH:/opt/openmpi-4.0.1/install/bin
 
-    # get singularity nemo
+    ##
+    # Now we can install NEMO
+    ##
+
     cd $WORK_DIR
 
     # this asks for username & password if SSH access is not setup...
@@ -238,7 +230,6 @@ From: ubuntu:18.04
 
 %help
     The definition file used to create this container builds NEMO, XIOS, and the following dependencies from source:
-        - curl (7.66.0)
         - OpenMPI (4.0.1)
         - HDF5 (1.10.5)
         - NetCDF C (4.7.1) and Fortran (4.5.2) libraries 
