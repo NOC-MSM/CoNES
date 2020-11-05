@@ -1,29 +1,16 @@
 Bootstrap: library
-From: ubuntu:18.04
-
-%post
-
-    apt-get install -y python \
-                       wget
-    
-    adduser --disabled-password --gecos "" nemo
-
-    mkdir /testnemo
-    cd /testnemo
-    wget https://raw.githubusercontent.com/wood-chris/singularity-nemo-def/master/test_writeable.py
-    chown -R nemo:nemo /testnemo
-    chmod -R 777 /testnemo
+From: ubuntu:20.04
 
 %labels
     Author c.wood@epcc.ed.ac.uk
     Version v0.0.1
 
 %runscript
+    echo $SSH_AUTH_SOCK
+
     NOW=`date` 
     echo "Hello World\n"
     echo $NOW
-
-    echo $(python --version)
 
 %help
     This is a demo container used to illustrate a def file that uses all
