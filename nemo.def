@@ -5,7 +5,7 @@ From: ubuntu:18.04
 #
 # Authors:      Chris Wood, EPCC, University of Edinburgh <c.wood@epcc.ed.ac.uk>; James Harle, National Oceanography Centre <jdha@noc.ac.uk>
 # Date:         2019-09-06
-# Last updated: 2020-01-07
+# Last updated: 2020-21-04
 #
 #   Unresolved issues / future work:
 #       - significant testing needed - does OpenMPI version on Cirrus need to the same as version in this def file?
@@ -123,6 +123,7 @@ From: ubuntu:18.04
     rm -r hdf5-1.10.5 # removes the 212 mb directory
 
     # and add this symlink (for xios / nemo) - can't do ln as nemo user
+    #not needed if on path
     ln -s /opt/openmpi-4.0.1/install/bin/mpif90 /usr/bin/mpif90
 
     # and LD_LIBRARY_PATH
@@ -200,8 +201,8 @@ From: ubuntu:18.04
     cd scripts
     ./nemo_setup_gyre -x /nemo -w /nemo -s /nemo/singularity-nemo
 
-    chown -Rv nemo:nemo /nemo
-    chmod -Rv 777 /nemo
+    chown -Rv nemo:nemo /nemo /opt
+    chmod -Rv 777 /nemo /opt
 
     apt-get clean # removes ~ 150 mb
 
@@ -215,6 +216,10 @@ From: ubuntu:18.04
     #export PATH=$PATH:/opt/openmpi-4.0.1/install/bin:/usr/local
     #export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
+    # do we need to add mpi lib?
+    # Add nemo / xios 
+    #PATH=/
+    # this is probably needed...
     export LD_LIBRARY_PATH=/opt/hdf5/install/lib:$LD_LIBRARY_PATH
 
 %runscript
