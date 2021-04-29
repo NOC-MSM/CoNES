@@ -1,0 +1,280 @@
+#!/bin/bash
+# Lightweight script to set up AMM7 on ARCHER2
+ 
+display_usage() { 
+   echo
+   echo "  Auto-Config: AMM7 on ARCHER2"
+   echo "  ***************************************"
+   echo
+   echo "  usage: ${0##*/} -w path_to_install_nemo -x path_to_intall_xios -s path_to_repo"
+   echo "                  -m machine -v version -c compiler"
+   echo
+   echo "  flags:  -w full path to where nemo will be installed"
+   echo "          -x full path to where xios will be installed"
+   echo "          -s full path to where AMM7 repository resides"
+   echo "          -m machine on which to compile code"
+   echo "          -v which version of NEMO to check out"
+   echo "          -c which compiler to use"
+   echo
+   exit 1
+	} 
+# if less than three arguments supplied, display usage 
+	if [  $# -le 11 ] 
+	then 
+		display_usage
+		exit 1
+	fi 
+# if less than two arguments supplied, display usage 
+	if [  $# -ge 13 ] 
+	then 
+		display_usage
+		exit 1
+	fi 
+# check whether user had supplied -h or --help . If yes display usage 
+	if [[ ( $# == "--help") ||  $# == "-h" ]] 
+	then 
+		display_usage
+		exit 0
+	fi 
+
+while getopts w:x:s:m:v:c: option
+  do
+  case "${option}"
+  in
+  w) export WORK_DIR=${OPTARG};;
+  x) export XIOS_DIR=${OPTARG};;
+  s) export REPO_DIR=${OPTARG};;
+  m) export HPC_TARG=${OPTARG};;
+  v) export NEMO_VER=${OPTARG};;
+  c) export COMPILER=${OPTARG};;
+  esac
+done
+
+if [ ${WORK_DIR:0:1} != "/" ]; then
+  echo "WORK_DIR must use full path"
+  exit 1
+fi
+
+if [ ${XIOS_DIR:0:1} != "/" ]; then
+  echo "XIOS_DIR must use full path"
+  exit 1
+fi
+
+if [ ${REPO_DIR:0:1} != "/" ]; then
+  echo "REPO_DIR must use full path"
+  exit 1
+fi
+
+# Change to some working directory of choice
+if [ ! -d "$WORK_DIR" ]; then
+  mkdir $WORK_DIR
+fi
+cd $WORK_DIR
+
+echo "Making sure that the correct modules are loaded"
+
+case "${HPC_TARG}"
+  in
+  archer2) module -s restore $REPO_DIR/scripts/env/ucx_env_${HPC_TARG}_${COMPILER}
+           ;;
+  *)       echo "Machine not recognised"
+           echo "Machines available: archer2"
+           exit 1
+esac
+
+case "${NEMO_VER}"
+  in
+  4.0.2)   echo "NEMO Version 4.0.2 will be checked out"
+           ;;
+  4.0.3)   echo "NEMO Version 4.0.3 will be checked out"
+           ;;
+  4.0.4)   echo "NEMO Version 4.0.4 will be checked out"
+           ;;
+  4.0.5)   echo "NEMO Version 4.0.5 will be checked out"
+           ;;
+  4.0.6)   echo "NEMO Version 4.0.6 will be checked out"
+           ;;
+  trunk)   echo "NEMO trunk will be checked out"
+           ;;
+  *)       echo "NEMO Version not recognised"
+           echo "Versions available: 4.0.2, 4.0.3, 4.0.4, 4.0.5, 4.0.6 and trunk"
+           exit 1
+esac
+
+# Checkout the NEMO code from the SVN Paris repository
+echo "Checking out NEMO repository"
+case "${NEMO_VER}"
+  in
+  trunk)   svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/trunk --depth empty nemo
+           svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/trunk/src --depth infinity nemo/src
+           svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/trunk/cfgs/SHARED nemo/cfgs/SHARED
+           svn export http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/trunk/cfgs/ref_cfgs.txt nemo/cfgs/ref_cfgs.txt
+           ;;
+  *)       svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER --depth empty nemo
+           svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER/src --depth infinity nemo/src
+           svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER/cfgs/SHARED nemo/cfgs/SHARED
+           svn export http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER/cfgs/ref_cfgs.txt nemo/cfgs/ref_cfgs.txt
+           ;;
+esac
+
+cd nemo
+
+# Now check EXTERNALS revision number before checking out the rest
+for ext_name in mk FCM IOIPSL
+  do
+  ext=`svn propget svn:externals | grep $ext_name | cut -c2-`
+  svn co http://forge.ipsl.jussieu.fr/nemo/svn/$ext
+done
+
+ext=`svn propget svn:externals | grep makenemo | cut -c2-`
+svn export http://forge.ipsl.jussieu.fr/nemo/svn/$ext
+
+mkdir arch
+
+# Setup the directory structure for the ENSEMBLE
+mkdir $WORK_DIR/nemo/cfgs/AMM7
+# Define the location of where the AMM7 forcing files are to be downloaded 
+
+echo $XIOS_DIR
+# Choose an appropriate directory for your XIOS installation
+if [ ! -d "$XIOS_DIR" ]; then
+  mkdir $XIOS_DIR
+fi
+cd $XIOS_DIR
+echo $PWD
+echo "Checking out xios repository"
+case "${NEMO_VER}"
+  in
+  4.0.2)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
+           ;;
+  4.0.3)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
+           ;;
+  4.0.4)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
+           ;;
+  4.0.5)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
+           ;;
+  4.0.6)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
+           ;;
+  trunk)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
+           ;;
+  *)       echo "NEMO Version not recognised"
+           echo "Versions available: 4.0.2, 4.0.3, 4.0.4, 4.0.5, 4.0.6 and trunk"
+           exit 1
+esac
+
+cd xios
+cp $REPO_DIR/arch/xios/* ./arch
+echo "Compiling xios"
+./make_xios --full --prod --arch ${HPC_TARG}_${COMPILER} --netcdf_lib netcdf4_par --job 10
+# Dirty fix here as xios has to unpack before we can edit
+sed -e "s/FC_MODSEARCH => '',  /FC_MODSEARCH => '-J',/" tools/FCM/lib/Fcm/Config.pm > tmp_file
+mv tmp_file tools/FCM/lib/Fcm/Config.pm
+# Try once more
+./make_xios --full --prod --arch ${HPC_TARG}_${COMPILER} --netcdf_lib netcdf4_par --job 10
+
+# Let's update the path to xios
+export XIOS_DIR=$XIOS_DIR/xios
+
+[ -f $XIOS_DIR/bin/xios_server.exe ] || exit 1
+
+cd $WORK_DIR/nemo
+cp $REPO_DIR/arch/nemo/* ./arch
+# Dirty fix to hard wire path otherwise user will have to set XIOS_DIR in every new shell session
+sed "s?XXX_XIOS_DIR_XXX?$XIOS_DIR?" ./arch/arch-${HPC_TARG}_${COMPILER}.fcm > tmp_arch
+mv tmp_arch ./arch/arch-${HPC_TARG}_${COMPILER}.fcm
+echo arch-${HPC_TARG}_${COMPILER}.fcm
+
+echo 'AMM7 OCE' >> $WORK_DIR/nemo/cfgs/work_cfgs.txt
+
+mkdir cfgs/AMM7/EXPREF
+mkdir cfgs/AMM7/EXP00
+echo "Gathering forcing data"
+
+export CONFIG_DIR=$WORK_DIR/nemo/cfgs/AMM7
+
+# Set up EXPREF for quick testing of the unforced case
+
+cd $CONFIG_DIR/EXPREF
+ln -s ../../SHARED/grid_def_nemo.xml grid_def_nemo.xml
+ln -s ../../SHARED/field_def_nemo-oce.xml field_def_nemo-oce.xml
+ln -s ../../SHARED/domain_def_nemo.xml domain_def_nemo.xml
+ln -s ../../SHARED/axis_def_nemo.xml axis_def_nemo.xml
+
+cp $REPO_DIR/EXPREF/$NEMO_VER/*.xml $CONFIG_DIR/EXPREF/
+cp $REPO_DIR/EXPREF/$NEMO_VER/namelist* $CONFIG_DIR/EXPREF/
+
+wget http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/domcfg/domain_cfg/domain_cfg_sf_L51_r24.nc 
+ln -s domain_cfg_sf_L51_r24.nc domain_cfg.nc
+
+cd $CONFIG_DIR/EXP00
+ln -s ../../SHARED/grid_def_nemo.xml grid_def_nemo.xml
+ln -s ../../SHARED/field_def_nemo-oce.xml field_def_nemo-oce.xml
+ln -s ../../SHARED/domain_def_nemo.xml domain_def_nemo.xml
+ln -s ../../SHARED/axis_def_nemo.xml axis_def_nemo.xml
+
+cp $REPO_DIR/EXPREF/$NEMO_VER/*.xml $CONFIG_DIR/EXP00/
+cp $REPO_DIR/EXPREF/$NEMO_VER/namelist* $CONFIG_DIR/EXP00/
+
+ln -s ../EXPREF/domain_cfg.nc domain_cfg.nc
+
+mkdir $CONFIG_DIR/EXP00/meta_out
+mkdir $CONFIG_DIR/EXP00/RESTARTS
+mkdir $CONFIG_DIR/EXP00/OUTPUTS
+ln -s $CONFIG_DIR/INPUTS $CONFIG_DIR/EXP00/INPUTS
+
+cd $CONFIG_DIR/INPUTS
+if [ 1 -eq 2 ]
+then
+mkdir BDY; cd BDY
+wget -r -l1 -np http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/BDY/2005/ -A '*m01*.nc' -nd -e robots=off
+cd ../
+mkdir BDY_SKAG; cd BDY_SKAG
+wget -r -l1 -np http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/BDY_SKAG/2005/ -A '*m01*.nc' -nd -e robots=off
+cd ../
+mkdir SBC
+mkdir RIV
+mkdir TIDE
+mkdir IC
+wget -r -l1 -np http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/IC/ -A '*.nc' -nd -e robots=off -P "./IC"
+wget -r -l1 -np http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/TIDE/ -A '*.nc' -nd -e robots=off -P "./TIDE"
+wget -r -l1 -np http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/RIV/ -A '*.nc' -nd -e robots=off -P "./RIV"
+wget -r -l1 -np http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/SBC/ -A '*2005*.nc' -nd -e robots=off -P "./SBC"
+wget http://gws-access.jasmin.ac.uk/public/jmmp_collab/AMM7/inputs/kd490.nc
+fi
+cd $CONFIG_DIR/EXP00/
+
+ln -s $XIOS_DIR/bin/xios_server.exe $CONFIG_DIR/EXP00/xios_server.exe
+
+cp -r $REPO_DIR/MY_SRC/${NEMO_VER} $CONFIG_DIR/MY_SRC
+cp $REPO_DIR/cpp_AMM7.fcm $CONFIG_DIR/
+
+cp $REPO_DIR/scripts/run/${HPC_TARG}_${COMPILER}/* $CONFIG_DIR/EXPREF/
+cp $REPO_DIR/scripts/run/${HPC_TARG}_${COMPILER}/* $CONFIG_DIR/EXP00/
+
+cd $CONFIG_DIR/EXP00
+for fn in runscript*
+do
+sed "s?XXX_ENV_DIR_XXX?$REPO_DIR/scripts/env/ucx_env_${HPC_TARG}_${COMPILER}?" $fn > tmp
+mv tmp $fn
+done
+
+cd $WORK_DIR/nemo/ext/FCM/lib/Fcm
+sed -e "s/FC_MODSEARCH => '',  /FC_MODSEARCH => '-J',/" Config.pm > tmp_file
+mv tmp_file Config.pm
+
+cd $WORK_DIR/nemo
+
+echo "Compiling nemo AMM7 Config"
+./makenemo -m ${HPC_TARG}_${COMPILER} -r AMM7 -j 8
+
+echo
+echo "  Auto-Config: AMM7"
+echo "  *****************************"
+echo
+echo "  To run the AMM7 Configuration:"
+echo
+echo "  - update the runscript.pbs accordingly "
+echo "      (project code, nodes, modules, etc)"
+echo
+echo "  - submit via the qsub command"
+echo    

@@ -1,0 +1,1 @@
+sed -n 12p AMM7_out | awk -F '[=]' '{print $7}'

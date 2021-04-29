@@ -1,0 +1,241 @@
+#!/bin/bash
+# Lightweight script to set up an MPIRUN RANKFILE
+ 
+display_usage() { 
+   echo
+   echo "  MPIRUN RANKFILE for NEMO/XIO           "
+   echo "  ***************************************"
+   echo "  We assume normal CPU naming convention" 
+   echo "  NOT round robin naming convention"
+   echo
+   echo "  usage: ${0##*/} [-h] [-S S] [-s s] [-m m] [-C C] [-c c]"
+   echo "                        [-v] [-N N] [-n n] [-H H]"
+   echo
+   echo "  flags:  -h, --help  show this help message and exit"
+   echo "          -S S        number of servers    (default: 2)"
+   echo "          -s s        server spacing       (default: 8)" 
+   echo "          -m m        max servers per node (default: 2)" 
+   echo "          -C C        number of clients    (default: 32)" 
+   echo "          -c c        clients per NUMA     (default: 16)" 
+   echo "          -N N        cores per node       (default: 128)" 
+   echo "          -n n        cores per NUMA       (default: 16)" 
+   echo "          -v          output node layout   (default: False)"
+   echo "          -H H        hostfile             (default: hostfile)" 
+   echo
+   exit 1
+	} 
+
+# if less than three arguments supplied, display usage 
+if [  $# -eq 0  ] 
+then 
+		display_usage
+exit 1
+fi 
+
+# Set default values
+export SERVERS=4
+export SERVER_SPACING=8
+export SERVERS_PER_NODE=2
+export CLIENTS=32
+export CLIENTS_PER_NUMA=16
+export MAX_CORES=128
+export NUMA_SIZE=16
+export HOSTFILE=''
+export NODE_MAP=0
+
+while getopts S:s:m:C:c:N:n:H:vh option
+  do
+  case "${option}"
+  in
+  S)  export SERVERS=${OPTARG};;
+  s)  export SERVER_SPACING=${OPTARG};;
+  m)  export SERVERS_PER_NODE=${OPTARG};;
+  C)  export CLIENTS=${OPTARG};;
+  c)  export CLIENTS_PER_NUMA=${OPTARG};;
+  N)  export MAX_CORES=${OPTARG};;
+  n)  export NUMA_SIZE=${OPTARG};;
+  H)  export HOSTFILE=${OPTARG};;
+  v)  export NODE_MAP=1;;
+  h)  display_usage;;
+  esac
+done
+
+# TODO: Need to check all OPTARG are INT
+# TODO: Need to check hostfile present
+
+# Set a few constants
+CLIENT_GAP=$(($NUMA_SIZE-$CLIENTS_PER_NUMA)) # Unused CORES per NUMA
+case $HOSTFILE in
+    ''|*[!0-9]*) 
+	    NODES=$(sort hostfile | uniq)                # Node IDs from hostfile
+	    NNODES=$(sort hostfile | uniq | wc -l)       # Number of nodes from hostfile
+	    ;;
+    *) 
+	    NODES='+n0'
+	    if [ $HOSTFILE -ge 2 ]
+	    then
+		    for n in $(seq 1 $(($HOSTFILE - 1)) )
+	    do
+		    NODES="${NODES} +n${n}"
+	    done
+            fi
+	    NNODES=$HOSTFILE
+	    ;;
+esac
+
+# Create an array of the nodes 
+NODE_ARRAY=()
+for node in $NODES; do
+  NODE_ARRAY+=( $node )
+done
+
+# Are there enough NODES for the SERVER distribution
+if [ $((($SERVERS - 1)/$SERVERS_PER_NODE)) -ge $NNODES ]
+then
+        echo 'Problem'
+        exit 1
+fi
+
+# Initialise the current slot for each node
+CURRSLOT_ARRAY=()
+for node in $NODES; do
+	CURRSLOT_ARRAY+=( 0 )
+	if [ $NODE_MAP -eq 1 ]
+	then
+		cp node_map node_map.${node}
+	fi
+done
+
+####################
+# Allocate SERVERS #
+####################
+
+RANK=0
+SERVERS_ALLOCATED=0
+node_position=0
+
+for node in $NODES; do
+    for server in $(seq 0 $(($SERVERS_PER_NODE - 1)) ); do
+        CURRSLOT=$(($server*$SERVER_SPACING))
+        echo "rank ${RANK}=$node slot=$CURRSLOT"
+	if [ $NODE_MAP -eq 1 ]
+	then
+		node_map_rank=$(($CURRSLOT + 1000))
+		sed "s/$node_map_rank/x/g" node_map.${node} > node_map.tmp; mv node_map.tmp node_map.${node} 
+	fi
+        RANK=$(($RANK + 1))
+        if [ $RANK -eq $SERVERS ]
+        then
+                # Move CURRSLOT forward $SERVER_SPACING, or to the start of
+                # the next NUMA whichever is sooner. Save in CURRSLOT_ARRAY
+                CURRSLOT=$(($CURRSLOT+$SERVER_SPACING))
+                CURRSLOT=$((($CURRSLOT/$NUMA_SIZE)*$NUMA_SIZE))
+                CURRSLOT_ARRAY[$node_position]=$CURRSLOT
+                break 2
+        fi
+    done
+    # Move CURRSLOT forward $SERVER_SPACING, or to the start of
+    # the next NUMA whichever is sooner. Save in CURRSLOT_ARRAY
+    CURRSLOT=$(($CURRSLOT+$SERVER_SPACING))
+    CURRSLOT=$((($CURRSLOT/$NUMA_SIZE)*$NUMA_SIZE))
+    CURRSLOT_ARRAY[$node_position]=$CURRSLOT
+    node_position=$(($node_position + 1))
+done
+
+####################
+# Allocate CLIENTS #
+####################
+
+node_position=0
+node=${NODE_ARRAY[$node_position]}
+CURRSLOT=${CURRSLOT_ARRAY[$node_position]}
+current_numa_slot=1
+count=1
+if [ $CLIENT_GAP -eq 0 ]
+then
+	do_we_miss=0
+else
+	do_we_miss=$((( ($NUMA_SIZE) + ($CLIENT_GAP/2) )/$CLIENT_GAP))
+fi
+
+for client in $(seq 0 $(($CLIENTS - 1)) ); do
+    while [[ $do_we_miss -eq $current_numa_slot &&  $current_numa_slot -le $NUMA_SIZE ]]; do
+	    CURRSLOT=$(($CURRSLOT + 1))
+	    count=$(($count + 1))
+	    current_numa_slot=$(($current_numa_slot + 1))
+	    do_we_miss=$((( ($count*$NUMA_SIZE) + ($CLIENT_GAP/2) )/$CLIENT_GAP))
+            if [ $CURRSLOT -ge $MAX_CORES ]
+	    then
+	    node_position=$(($node_position + 1))
+            node=${NODE_ARRAY[$node_position]}
+            CURRSLOT=${CURRSLOT_ARRAY[$node_position]}
+            current_numa_slot=1
+            count=1
+            do_we_miss=$((( ($NUMA_SIZE) + ($CLIENT_GAP/2) )/$CLIENT_GAP))
+
+            if [ $node_position -ge $NNODES ]
+            then
+                    echo 'Need more NODES for number of CLIENTS requested'
+		    exit 1
+            fi
+            fi
+            if [ $current_numa_slot -gt $NUMA_SIZE ]
+            then
+		    current_numa_slot=1
+		    count=1 
+		    do_we_miss=$((( ($NUMA_SIZE) + ($CLIENT_GAP/2) )/$CLIENT_GAP))
+	    fi
+    done
+    if [ $current_numa_slot -le $NUMA_SIZE ]
+    then
+         echo "rank ${RANK}=$node slot=$CURRSLOT"
+	 if [ $NODE_MAP -eq 1 ]
+	 then
+	 	node_map_rank=$(($CURRSLOT + 1000))
+ 		sed "s/$node_map_rank/n/g" node_map.${node} > node_map.tmp; mv node_map.tmp node_map.${node} 
+         fi
+         RANK=$(($RANK + 1))
+         CURRSLOT=$(($CURRSLOT + 1))
+         current_numa_slot=$(($current_numa_slot + 1))
+    fi
+    if [ $CURRSLOT -ge $MAX_CORES ]
+    then
+            node_position=$(($node_position + 1))
+            node=${NODE_ARRAY[$node_position]}
+            CURRSLOT=${CURRSLOT_ARRAY[$node_position]}
+	    current_numa_slot=1
+            count=1
+	    if [ $CLIENT_GAP -gt 0 ]
+	    then
+                  do_we_miss=$((( ($NUMA_SIZE) + ($CLIENT_GAP/2) )/$CLIENT_GAP))
+            fi
+	    
+	    if [ $node_position -ge $NNODES ]
+	    then
+                    echo 'Need more NODES for number of CLIENTS requested'
+		    exit 1
+	    fi
+    fi
+    if [ $current_numa_slot -gt $NUMA_SIZE ]
+    then
+	    current_numa_slot=1
+            count=1
+	    if [ $CLIENT_GAP -gt 0 ]
+	    then
+                  do_we_miss=$((( ($NUMA_SIZE) + ($CLIENT_GAP/2) )/$CLIENT_GAP))
+            fi
+    fi
+done
+
+
+if [ $NODE_MAP -eq 1 ]
+then
+	for node in $NODES; do
+                for core in {1000..1127}; do
+			sed "s/$core/o/g" node_map.${node} > node_map.tmp; mv node_map.tmp node_map.${node}
+		done
+		node_len=${#node}
+		# TODO: use printf "%$node_len-4 %s" $node or such like to handle variable node name widths in node_map template
+		sed "s/NODE           /NODE: $node/g" node_map.${node} > node_map.tmp; mv node_map.tmp node_map.${node}
+        done
+fi
