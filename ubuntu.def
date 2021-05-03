@@ -12,6 +12,10 @@ From: ubuntu:20.04
     echo "Hello World\n"
     echo $NOW
 
+%post
+    echo 'export my_env=10' >>$SINGULARITY_ENVIRONMENT
+    echo 'export LD_LIBRARY_PATH=/opt/hdf5/install/lib' >>$SINGULARITY_ENVIRONMENT
+
 %help
     This is a demo container used to illustrate a def file that uses all
     supported sections.
