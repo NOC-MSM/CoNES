@@ -1,22 +1,16 @@
 Bootstrap: library
 From: ubuntu:18.04
 
+#%environment
+
+#    export SSH_AUTH_SOCK=$SSH_AUTH_SOCK
+
 %post
+    apt install -y git
 
-#    apt-get install -y python \
-#                       wget
-    
-#    adduser --disabled-password --gecos "" nemo
-
-#    mkdir /testnemo
-#    cd /testnemo
-#    wget https://raw.githubusercontent.com/wood-chris/singularity-nemo-def/master/test_writeable.py
-#    chown -R nemo:nemo /testnemo
-#    chmod -R 777 /testnemo
-
-    mkdir -p /opt/nemo && cd /opt/nemo
-    touch a.txt
-    touch b.txt
+    mkdir /nemo
+    cd /nemo
+    GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone git@github.com:NOC-MSM/singularity-nemo.git	
 
 %labels
     Author c.wood@epcc.ed.ac.uk
@@ -24,20 +18,12 @@ From: ubuntu:18.04
 
 %runscript
 
-    echo $1
 
     NOW=`date` 
     echo "Hello World\n"
     echo $NOW
 
-    echo $(python --version)
-
-    mkdir output && cd output
-
-    for f in /opt/nemo/*
-    do
-        ln -s $f
-    done
+    ls -l /nemo
 
 %help
     This is a demo container used to illustrate a def file that uses all
