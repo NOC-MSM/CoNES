@@ -67,8 +67,6 @@ From: ubuntu:18.04
                        curl \
                        zlib1g-dev \
                        # build-essential # can't remember why I had this, but it's not needed - any advantage to installing anyway?
-                   
-
 
     apt-get install -y libibverbs-dev 
 
@@ -178,7 +176,7 @@ From: ubuntu:18.04
     #su nemo
 
     # WORK_DIR=/nemo >> $SINGULARITY_ENVIRONMENT # superfluous...
-    PATH=$PATH:/opt/openmpi-2.0.1/install/bin:/opt/hdf5/install/bin
+    PATH=$PATH:/opt/openmpi-4.0.1/install/bin:/opt/hdf5/install/bin
     # this is needed for the NEMO and XIOS build scripts 
     #PATH=$PATH:/opt/openmpi-4.0.1/install/bin
 
@@ -188,11 +186,10 @@ From: ubuntu:18.04
 
     cd $WORK_DIR
 
-    # this asks for username & password if SSH access is not setup...
-    git clone https://github.com/NOC-MSM/singularity-nemo # 
-    #mkdir -p ~/.ssh 
-    #ssh-keyscan github.com >> ~/.ssh/known_hosts
-    #git@github.com:NOC-MSM/singularity-nemo.git
+    # These GIT_SSH_COMMAND options prevent prompts. Since we're root, not the user on the host who will (probably) have the SSH agent, we also need to pass the SSH_AUTH_SOCK environment
+    # variable: SINGULARITYENV_SSH_AUTH_SOCK=$SSH_AUTH_SOCK
+    GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone git@github.com:NOC-MSM/singularity-nemo.git
+    
     cd singularity-nemo
 
     # dev branch
@@ -200,6 +197,12 @@ From: ubuntu:18.04
 
     cd scripts
     ./nemo_setup_gyre -x /nemo -w /nemo -s /nemo/singularity-nemo
+
+    mkdir /opt/nemo
+    mv /nemo/nemo/cfgs/GYRE_PISCES/EXP00/nemo /opt/nemo/
+
+    mkdir /opt/xios
+    mv /nemo/nemo/cfgs/GYRE_PISCES/EXP00/xios_server.exe /opt/xios/xios
 
     chown -Rv nemo:nemo /nemo /opt
     chmod -Rv 777 /nemo /opt
@@ -223,11 +226,49 @@ From: ubuntu:18.04
     export LD_LIBRARY_PATH=/opt/hdf5/install/lib:$LD_LIBRARY_PATH
 
 %runscript
-    
-    echo `printenv`
 
-    NOW=`date`
-    echo "Container was executed $NOW"
+    # This runscript will take 2 arguments: program to run (NEMO or XIOS), and an output directory. By default, the output directory will be the job id (passed using $SLURM_JOB_ID).    
+
+    # create directory so we can symlink to /nemo/nemo/cfgs/GYRE_PISCES/EXP00/
+    # we should allow an output directory, and manage this in a cleanup section of the batch script, before deleting the symlinked directory there
+
+    declare -A programs
+    for program in nemo xios
+    do
+        programs[$c]=1
+    done
+
+    if ! [[ ${programs[$1]} ]]
+    then
+        echo "The program argument should be either 'nemo' or 'xios'"
+        exit 1
+    fi
+
+    if [[ $2 == "" ]]
+    then
+        echo "Please supply an output directory"
+        exit 1
+    fi
+
+    if [ ! -d $2 ]
+    then
+        mkdir $2
+        cd $2
+
+        for file in /nemo/nemo/cfgs/GYRE_PISCES/EXP00/*
+        do
+            ln -s $file
+        done
+    else
+        cd $2
+    fi
+
+    if $1 == 'nemo'
+    then
+        /opt/nemo/nemo
+    else
+        /opt/xios/xios
+    fi
 
 %labels
     Author c.wood@epcc.ed.ac.uk
@@ -239,4 +280,20 @@ From: ubuntu:18.04
         - HDF5 (1.10.5)
         - NetCDF C (4.7.1) and Fortran (4.5.2) libraries 
 
-    # expand to include NEMO and XIOS versions  
+    This container includes XIOS v2.5 and a GYRE_PISCES build of NEMO
+
+    To build the container, run
+
+        singularity build nemo.sif nemo.def
+
+    To build, it requires you to have read access to the NOC-MSM `singularity-nemo` repository. If you have SSH access set up, you can pass the SSH_AUTH_SOCK environment variable to 
+    prevent being prompted for your username and password, by building as
+
+        SINGULARITYENV_SSH_AUTH_SOCK=$SSH_AUTH_SOCK singularity build nemo.sif nemo.def
+
+    The resulting container has one mandatory and on optional arugments: the program to run with that instance (nemo or xios), and an output directory name. If submitted as part of a slurm 
+    sunmission, the output directory name will, by default, be the job id
+
+    # more info about running mpi with examples, e.g.
+
+    # mpirun -npernode 1 -n 1 --mca orte_base_help_aggregate 0 --mca btl_vader_single_copy_mechanim none --mca btl ^sm --mca btl_openib_allow_ib true --bind-to core singularity -d exec -B /etc/libibverbs.d --env LD_LIBRARY_PATH=/opt/hdf5/install/lib:$LD_LIBRARY_PATH --pwd $HOME/containers/nemo/cfgs/GYRE_PISCES/EXP00 nemo.sif /opt/nemo/nemo : -N 1 -n 1 singularity exec --pwd $HOME/containers/nemo/cfgs/GYRE_PISCES/EXP00 nemo.sif /nemo/nemo/cfgs/GYRE_PISCES/EXP00/xios_server.exe 
