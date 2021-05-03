@@ -14,16 +14,30 @@ From: ubuntu:18.04
     chown -R nemo:nemo /testnemo
     chmod -R 777 /testnemo
 
+    mkdir -p /opt/nemo && cd $_
+    touch a.txt
+    touch b.txt
+
 %labels
     Author c.wood@epcc.ed.ac.uk
     Version v0.0.1
 
 %runscript
+
+    echo $1
+
     NOW=`date` 
     echo "Hello World\n"
     echo $NOW
 
     echo $(python --version)
+
+    mkdir output && cd $_
+
+    for f in /opt/nemo/*
+    do
+        ln -s $f
+    done
 
 %help
     This is a demo container used to illustrate a def file that uses all
