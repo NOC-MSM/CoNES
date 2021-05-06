@@ -212,10 +212,6 @@ From: ubuntu:18.04
 
     apt-get clean # removes ~ 150 mb
 
-    # Good practice to remove the authorized_keys of the host user we used to clone the nemo singularity repo 
-#    rm /root/.ssh/authorized_keys
-
-
 %environment
     
     #export ZDIR=/usr/local
