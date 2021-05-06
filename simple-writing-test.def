@@ -1,97 +1,43 @@
 Bootstrap: library
 From: ubuntu:18.04
 
-#%environment
-
-#    export SSH_AUTH_SOCK=$SSH_AUTH_SOCK
-#    export HOST_HOME=$HOST_HOME
-
-#%setup
-
-
-#    cp $HOME/.ssh/authorized_keys ${SINGULARITY_ROOTFS}/root/.ssh/
-
-#    mkdir /nemo 
-#    chmod 777 -Rv /nemo 
-#    GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone git@github.com:NOC-MSM/singularity-nemo.git /nemo/singularity-nemo 	
-
-
 %post
-    echo $HOME
 
-    echo $PWD 
+    apt-get install -y python \
+                       wget
+    
+    adduser --disabled-password --gecos "" nemo
 
-    echo $UGG
+    mkdir /testnemo
+    cd /testnemo
+    wget https://raw.githubusercontent.com/wood-chris/singularity-nemo-def/master/test_writeable.py
+    chown -R nemo:nemo /testnemo
+    chmod -R 777 /testnemo
 
-#    apt install -y git
-
-#    mkdir /nemo
-#    cd /nemo
-#    GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone git@github.com:NOC-MSM/singularity-nemo.git	
-
-#    rm /root/.ssh/authorized_keys
+    mkdir -p /opt/nemo && cd $_
+    touch a.txt
+    touch b.txt
 
 %labels
     Author c.wood@epcc.ed.ac.uk
     Version v0.0.1
 
 %runscript
-     #!/bin/bash
-     echo $SHELL
 
-#    NOW=`date` 
-#    echo "Hello World\n"
-#    echo $NOW
+    echo $1
 
-#    ls -l /nemo
+    NOW=`date` 
+    echo "Hello World\n"
+    echo $NOW
 
-    declare -A programs
+    echo $(python --version)
 
-    for program in nemo xios
+    mkdir output && cd output
+
+    for f in /opt/nemo/*
     do
-      programs[$program]=1
+        ln -s $f
     done
-
-    # check if the first argument is a valid program to run
-    if ! [[ ${programs[$1]} ]]
-
-#    if ! [[ $1 == "nemo" || $1 == "xios" ]]	
-    then
-      echo "The program argument should be either 'nemo' or 'xios'"
-      exit 1
-    fi
-
-    results_dir=$2
-
-    if [[ -z $2 ]]
-    then
-      results_dir=$UGG_TEST
-    fi
-
-    if [[ -z $results_dir ]]
-    then
-        echo "Please supply an output directory"
-        exit 1
-    fi
-
-    if [[ ! -d $results_dir ]]
-    then
-        mkdir $results_dir && cd $_
-
-        for file in /nemo/nemo/cfgs/GYRE_PISCES/EXP00/*
-        do
-            ln -s $file
-        done
-    else
-        cd $2
-    fi
-
-    if [[ $1 == 'nemo' ]]
-    then
-        /opt/nemo/nemo
-    else
-        /opt/xios/xios
-    fi
 
 %help
     This is a demo container used to illustrate a def file that uses all
