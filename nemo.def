@@ -240,6 +240,10 @@ From: ubuntu:18.04
     # create directory so we can symlink to /nemo/nemo/cfgs/GYRE_PISCES/EXP00/
     # we should allow an output directory, and manage this in a cleanup section of the batch script, before deleting the symlinked directory there
 
+    # Improvements:
+    #   - update when we use a generic cfg directory
+    #   - is using $SLURM_JOB_ID directly here best, or should we pass it as the 2nd argument to the script and use a more generic variable here?
+
 #    declare -A programs
 #    for program in nemo xios
 #    do
@@ -266,7 +270,7 @@ From: ubuntu:18.04
 
     if [[ -z $2 ]]
     then
-      results_dir=$UGG_TEST
+      results_dir=$SLURM_JOB_ID
     fi
 
     if [[ -z $results_dir ]]
