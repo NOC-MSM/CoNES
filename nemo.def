@@ -243,6 +243,8 @@ From: ubuntu:18.04
     # Improvements:
     #   - update when we use a generic cfg directory
     #   - is using $SLURM_JOB_ID directly here best, or should we pass it as the 2nd argument to the script and use a more generic variable here?
+    #   - we could make the arguments a bit more intelligent; e.g.
+    #       - if only 1 argument, check whether it's nemo or xios; if neither then it's an output directory (and run nemo in attached mode)
 
     if ! [[ $1 == "nemo" || $1 == "xios" ]]    
     then
