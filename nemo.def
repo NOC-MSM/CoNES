@@ -244,22 +244,6 @@ From: ubuntu:18.04
     #   - update when we use a generic cfg directory
     #   - is using $SLURM_JOB_ID directly here best, or should we pass it as the 2nd argument to the script and use a more generic variable here?
 
-#    declare -A programs
-#    for program in nemo xios
-#    do
-#        programs[$c]=1
-#    done
-#
-#    if ! [[ ${programs[$1]} ]]
-#    then
-#        echo "The program argument should be either 'nemo' or 'xios'"
-#        exit 1
-#    fi
-
-#    results_dir=$2
-    # check if the first argument is a valid program to run
-#    if ! [[ ${programs[$1]} ]]
-#
     if ! [[ $1 == "nemo" || $1 == "xios" ]]    
     then
       echo "The program argument should be either 'nemo' or 'xios'"
@@ -291,7 +275,7 @@ From: ubuntu:18.04
         cd $2
     fi
 
-    if $1 == 'nemo'
+    if [[ $1 == 'nemo' ]]
     then
         /opt/nemo/nemo
     else
@@ -317,7 +301,7 @@ From: ubuntu:18.04
     To build, it requires you to have read access to the NOC-MSM `singularity-nemo` repository. If you have SSH access set up, you can pass the SSH_AUTH_SOCK environment variable to 
     prevent being prompted for your username and password, by building as
 
-        SINGULARITYENV_SSH_AUTH_SOCK=$SSH_AUTH_SOCK singularity build nemo.sif nemo.def
+        sudo SINGULARITYENV_SSH_AUTH_SOCK=$SSH_AUTH_SOCK singularity build nemo.sif nemo.def
 
     The resulting container has one mandatory and on optional arugments: the program to run with that instance (nemo or xios), and an output directory name. If submitted as part of a slurm 
     sunmission, the output directory name will, by default, be the job id
