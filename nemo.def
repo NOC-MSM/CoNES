@@ -241,6 +241,7 @@ From: ubuntu:18.04
     #   - is using $SLURM_JOB_ID directly here best, or should we pass it as the 2nd argument to the script and use a more generic variable here?
     #   - we could make the arguments a bit more intelligent; e.g.
     #       - if only 1 argument, check whether it's nemo or xios; if neither then it's an output directory (and run nemo in attached mode)
+    #       - does the output directory need to be set for both 
 
     if ! [[ $1 == "nemo" || $1 == "xios" ]]    
     then
@@ -263,15 +264,26 @@ From: ubuntu:18.04
 
     if [[ ! -d $results_dir ]]
     then
-        mkdir $results_dir && cd $_
+        mkdir $results_dir
+    fi 
 
-        for file in /nemo/nemo/cfgs/GYRE_PISCES/EXP00/*
-        do
-            ln -s $file
-        done
-    else
-        cd $2
-    fi
+    cd $results_dir
+
+    for file in /nemo/nemo/cfgs/GYRE_PISCES/EXP00/*
+    do
+    
+        # check if the file is already symlinked to prevent lots of spurious error messages
+        # but, we have to create this linkfile variable: some of the nemo files are themselves symlinks, so the 
+        # if statement will fail to create a symlink for those if we just use the base path
+        
+        linkfile=`basename $file`
+
+        if ! [[ -L $linkfile ]]
+        then
+            ln -s $file $linkfile
+        fi
+    done
+    
 
     if [[ $1 == 'nemo' ]]
     then
@@ -279,6 +291,13 @@ From: ubuntu:18.04
     else
         /opt/xios/xios
     fi
+
+    # do some checking here to make sure the job has finished (to do), and then delete the symlinks:
+
+    #find . -type l | while read linkname
+    #do
+    #    rm $linkname
+    #done
 
 %labels
     Author c.wood@epcc.ed.ac.uk
