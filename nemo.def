@@ -73,6 +73,7 @@ From: ubuntu:18.04
 
     apt-get install -y libibverbs-dev 
 
+    apt-get install -y libpmi0-dev libslurm-dev
 
     
     # these were dependencies that Michael Bareford installed in his example Singularity container - do we need them? (https://www.wiki.ed.ac.uk/display/EPCC/Building+a+Container)
@@ -91,7 +92,7 @@ From: ubuntu:18.04
     rm openmpi-4.0.1.tar.gz
     
     cd openmpi-4.0.1
-    ./configure CC=gcc CXX=g++ FC=gfortran --enable-mpi1-compatibility --prefix=/opt/openmpi-4.0.1/install --with-verbs
+    CPPFLAGS=-I/usr/include/slurm LDFLAGS=-L/usr/lib/x86_64-linux-gnu ./configure CC=gcc CXX=g++ FC=gfortran --enable-mpi1-compatibility --prefix=/opt/openmpi-4.0.1/install --with-verbs --with-slurm --with-pmi=/usr/include/slurm --with-pmi-libdir=/usr/lib/x86_64-linux-gnu
     make
     make install
     cd ..
