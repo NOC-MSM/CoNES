@@ -46,39 +46,38 @@ From: ubuntu:18.04
     # unless I set locales[-all] separately and installed python first
     ##
 
-    apt-get install -y locales #locales-all
+    apt install -y locales #locales-all
     locale-gen en_GB en_GB.UTF-8 # en_US en_US.UTF-8
 
-    apt-get install -y software-properties-common
+    apt install -y software-properties-common
     add-apt-repository universe
-    apt-get update
+    apt update
 
     # n.b. 
     #   - libcurl4-openssl-dev also installs libcurl4 (as does curl, if not already installed)
     #   - zlib already installed
-    apt-get install -y python \
-                       subversion \
-                       wget \
-                       git \
-                       make \
-                       m4 \
-                       gcc \
-                       gfortran \
-                       g++ \
-                       liburi-perl \
-                       libcurl4-openssl-dev \
-                       curl \
-                       zlib1g-dev \
-                       # build-essential # can't remember why I had this, but it's not needed - any advantage to installing anyway?
+    apt install -y python \
+                   subversion \
+                   wget \
+                   git \
+                   make \
+                   m4 \
+                   gcc \
+                   gfortran \
+                   g++ \
+                   liburi-perl \
+                   libcurl4-openssl-dev \
+                   curl \
+                   zlib1g-dev \
+                   libibverbs-dev \
+                   libpmi0-dev \
+                   libslurm-dev
 
-    apt-get install -y libibverbs-dev 
+    # let's see if this helps decrease the size of the container
+    apt full-upgrade
+    apt autoremove --purge    
+    apt clean
 
-    apt-get install -y libpmi0-dev libslurm-dev
-
-    
-    # these were dependencies that Michael Bareford installed in his example Singularity container - do we need them? (https://www.wiki.ed.ac.uk/display/EPCC/Building+a+Container)
-    #    apt-get install -y build-essential uuid-dev libssl-dev libseccomp-dev libgpgme11-dev iputils-ping squashfs-tools wget git pkg-config m4 gfortran zlib1g-dev vim-tiny bc libibverbs-dev
-            
     ###
     # softlink gmake to make
     ###
@@ -92,7 +91,7 @@ From: ubuntu:18.04
     rm openmpi-4.0.1.tar.gz
     
     cd openmpi-4.0.1
-    CPPFLAGS=-I/usr/include/slurm LDFLAGS=-L/usr/lib/x86_64-linux-gnu ./configure CC=gcc CXX=g++ FC=gfortran --enable-mpi1-compatibility --prefix=/opt/openmpi-4.0.1/install --with-verbs --with-slurm --with-pmi=/usr/include/slurm --with-pmi-libdir=/usr/lib/x86_64-linux-gnu
+    CPPFLAGS=-I/usr/include/slurm-wlm LDFLAGS=-L/usr/lib/x86_64-linux-gnu ./configure CC=gcc CXX=g++ FC=gfortran --enable-mpi1-compatibility --prefix=/opt/openmpi-4.0.1/install --with-verbs --with-slurm --with-pmi=/usr/include/slurm-wlm --with-pmi-libdir=/usr/lib/x86_64-linux-gnu
     make
     make install
     cd ..
@@ -210,8 +209,6 @@ From: ubuntu:18.04
 
     chown -Rv nemo:nemo /nemo /opt
     chmod -Rv 777 /nemo /opt
-
-    apt-get clean # removes ~ 150 mb
 
 %environment
     
