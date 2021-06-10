@@ -1,5 +1,5 @@
 Bootstrap: library
-From: ubuntu:18.04
+From: ubuntu:20.04
 
 ####
 #
@@ -35,15 +35,13 @@ From: ubuntu:18.04
 %post
 
     ##
-    # Compilation from source necessary where apt-get binaries weren't compiled with necessary dependencies
-    # for XIOS and NEMO
+    #
+    # Compilation from source necessary where apt-get binaries weren't compiled with necessary dependencies for XIOS and NEMO
+    #
     ##
 
+    ##
     # install basic stuff
-
-    ##
-    # Although my original order worked when just testing the commands, when building as a container, I had locales and python errors (and the build was killed)
-    # unless I set locales[-all] separately and installed python first
     ##
 
     apt install -y locales #locales-all
@@ -70,13 +68,17 @@ From: ubuntu:18.04
                    curl \
                    zlib1g-dev \
                    libibverbs-dev \
-                   libpmi0-dev \
+                   libpmix-dev \
                    libslurm-dev
 
-    # let's see if this helps decrease the size of the container
-    apt full-upgrade
-    apt autoremove --purge    
+    # this decreases the size of the container
     apt clean
+
+    ##
+    # make user `nemo` - mpiexec in hdf5 `make check` complains if run as root (although we're not running it at the moment)
+    ##
+
+    adduser --disabled-password --gecos "" nemo
 
     ###
     # softlink gmake to make
@@ -84,37 +86,36 @@ From: ubuntu:18.04
 
     ln -s /usr/bin/make /usr/bin/gmake
 
-    # compiling openmpi from source
-    mkdir -p /opt/openmpi-4.0.1 && cd $_
-    wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.1.tar.gz
-    tar -xvzf openmpi-4.0.1.tar.gz
-    rm openmpi-4.0.1.tar.gz
+    ##
+    # compiling openmpi
+    ##
+
+    mkdir -p /opt/openmpi-4.1.1 && cd $_
+    wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.bz2
+    tar -xvjf openmpi-4.1.1.tar.bz2
+    rm openmpi-4.1.1.tar.bz2
     
-    cd openmpi-4.0.1
-    CPPFLAGS=-I/usr/include/slurm-wlm LDFLAGS=-L/usr/lib/x86_64-linux-gnu ./configure CC=gcc CXX=g++ FC=gfortran --enable-mpi1-compatibility --prefix=/opt/openmpi-4.0.1/install --with-verbs --with-slurm --with-pmi=/usr/include/slurm-wlm --with-pmi-libdir=/usr/lib/x86_64-linux-gnu
+    cd openmpi-4.1.1
+    ./configure CC=gcc CXX=g++ FC=gfortran --enable-mpi1-compatibility --prefix=/opt/openmpi-4.1.1/install --with-verbs --with-slurm --with-pmix
     make
     make install
     cd ..
-    rm -r openmpi-4.0.1 # removes the 303 mb directory
+    rm -r openmpi-4.1.1 # removes the 303 mb directory
 
-    # add user `nemo` - mpiexec in hdf5 `make check` complains if run as root (although we might end up not running make check)
-    adduser --disabled-password --gecos "" nemo
-
-    WORK_DIR=/nemo >> $SINGULARITY_ENVIRONMENT
-    mkdir $WORK_DIR
-    chown nemo:nemo -R $WORK_DIR
-    cd $WORK_DIR
-
+    ##
     # compile HDF5 libraries
-    mkdir -p /opt/hdf5 && cd $_ # mkdir /home/nemo/hdf5
-    #cd /opt/hdf5
-    wget -O hdf5.tar.gz "https://www.hdfgroup.org/package/hdf5-1-10-5-tar-gz/?wpdmdl=13571&refresh=5d94c86107ca21570031713"
-    tar xzvf hdf5.tar.gz
-    rm hdf5.tar.gz
-    H5DIR=/opt/hdf5/install # /usr/local # /home/nemo/hdf5/install
-    cd hdf5-1.10.5/
+    ##
+
+    mkdir -p /opt/hdf5 && cd $_hdf5
+    wget -O hdf5.tar.bz2 "https://www.hdfgroup.org/package/hdf5-1-12-0-tar-bz2/?wpdmdl=14584&refresh=60be563cf137e1623086652"
+    tar xjvf hdf5.tar.bz2
+    rm hdf5.tar.bz2
+
+    H5DIR=/opt/hdf5/install
+    cd hdf5-1.12.0
+
     # n.b. --enable-fortran specifically not needed (https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html#build_default)
-    CC=/opt/openmpi-4.0.1/install/bin/mpicc ./configure --prefix=${H5DIR} --enable-hl --enable-parallel 
+    CC=/opt/openmpi-4.1.1/install/bin/mpicc ./configure --prefix=${H5DIR} --enable-hl --enable-parallel --with-default-api-version=v18
     make
     # maybe we shouldn't bother with make check - it complains about a lot and we're not actually building on a parallel file system
     # so some of the checks are totally irrelevant
@@ -123,72 +124,54 @@ From: ubuntu:18.04
     cd .. 
     rm -r hdf5-1.10.5 # removes the 212 mb directory
 
-    # and add this symlink (for xios / nemo) - can't do ln as nemo user
-    #not needed if on path
-    ln -s /opt/openmpi-4.0.1/install/bin/mpif90 /usr/bin/mpif90
-
-    # and LD_LIBRARY_PATH
-    LD_LIBRARY_PATH=/opt/hdf5/install/lib:$LD_LIBRARY_PATH
-    #LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-
     ##
-    # hmm, maybe netCDF doesn't like anything being anywhere but /usr/local...
-    # but: I wanted to install hdf5 library locally because make check runs mpiexec, which complains if it's run as root
-    # ... but non-root can't install to /usr/local?
+    # compile NetCDF libraries
     ##
 
-    ##
-    # FIXED! (I think) ... I originally had NCDIR and NFDIR as /home/nemo/netcdf/install but even adding this to PATH and LD_LIBRARY_LINK didn't seem to work
-    ##
+    mkdir -p /opt/netcdf && cd $_
 
-    # compile NetCDF libs
-    mkdir -p /opt/netcdf && cd $_ # mkdir -p /home/nemo/netcdf
-    #cd $WORK_DIR
-    #cd /opt/netcdf
-    wget -O netcdf.tar.gz https://github.com/Unidata/netcdf-c/archive/v4.7.1.tar.gz
+    # C libraries...
+    wget -O netcdf.tar.gz https://github.com/Unidata/netcdf-c/archive/v4.8.0.tar.gz
     tar xzvf netcdf.tar.gz
     rm netcdf.tar.gz 
     
-    cd netcdf-c-4.7.1 
-    NCDIR=/opt/netcdf/install #/usr/local
+    cd netcdf-c-4.8.0
+    NCDIR=/opt/netcdf/install
     
-    CC=/opt/openmpi-4.0.1/install/bin/mpicc FC=/opt/openmpi-4.0.1/install/bin/mpifort CPPFLAGS="-I${H5DIR}/include" LDFLAGS="-L${H5DIR}/lib" ./configure --disable-shared --prefix=$NCDIR
+    CC=/opt/openmpi-4.1.1/install/bin/mpicc FC=/opt/openmpi-4.1.1/install/bin/mpifort CPPFLAGS="-I${H5DIR}/include" LDFLAGS="-L${H5DIR}/lib" ./configure --disable-shared --prefix=$NCDIR
     make
-    # make check fails; again - maybe we should avoid running it (only 1 response from a question on the netcdf mailing list, saying it is really finicky) 
+    # make check fails; maybe we should avoid running it (only 1 response from a question on the netcdf mailing list, saying it is really finicky) 
     # make check
     make install
     cd .. 
-    rm -r netcdf-c-4.7.1 # removes the 125 mb directory
+    rm -r netcdf-c-4.8.0 # removes the 125 mb directory
 
-    ## and the fortran libraries
-    wget https://github.com/Unidata/netcdf-fortran/archive/v4.5.2.tar.gz
-    tar xzvf v4.5.2.tar.gz
-    rm v4.5.2.tar.gz
-    cd netcdf-fortran-4.5.2
-    NFDIR=/opt/netcdf/install #/usr/local
+    # ...and the fortran libraries
+    wget https://github.com/Unidata/netcdf-fortran/archive/v4.5.3.tar.gz
+    tar xzvf v4.5.3.tar.gz
+    rm v4.5.3.tar.gz
+    cd netcdf-fortran-4.5.3
+    NFDIR=/opt/netcdf/install
     
-    CC=/opt/openmpi-4.0.1/install/bin/mpicc FC=/opt/openmpi-4.0.1/install/bin/mpifort CPPFLAGS="-I${NCDIR}/include -I${H5DIR}/include" LDFLAGS="-L${NCDIR}/lib -L${H5DIR}/lib" LIBS="-lhdf5 -lhdf5_hl -lcurl" ./configure --prefix=$NFDIR --disable-shared
+    CC=/opt/openmpi-4.1.1/install/bin/mpicc FC=/opt/openmpi-4.1.1/install/bin/mpifort CPPFLAGS="-I${NCDIR}/include -I${H5DIR}/include" LDFLAGS="-L${NCDIR}/lib -L${H5DIR}/lib" LIBS="-lhdf5 -lhdf5_hl -lcurl" ./configure --prefix=$NFDIR --disable-shared
     make
     make install
     cd ..
-    rm -r netcdf-fortran-4.5.2 # removes the 18 mb directory
-
-    # Actually - when we build a container, everything in the container is the same as the user outside the container - since building needs sudo, then this will be root
-    # Changing to su nemo here has no effect
-
-    #su nemo
-
-    # WORK_DIR=/nemo >> $SINGULARITY_ENVIRONMENT # superfluous...
-    PATH=$PATH:/opt/openmpi-4.0.1/install/bin:/opt/hdf5/install/bin
-    # this is needed for the NEMO and XIOS build scripts 
-    #PATH=$PATH:/opt/openmpi-4.0.1/install/bin
+    rm -r netcdf-fortran-4.5.3 # removes the 18 mb directory
 
     ##
     # Now we can install NEMO
     ##
 
-    cd $WORK_DIR
+    ln -s /opt/openmpi-4.1.1/install/bin/mpif90 /usr/bin/mpif90
 
+    WORK_DIR=/nemo >> $SINGULARITY_ENVIRONMENT
+    mkdir $WORK_DIR && cd $_
+    chown nemo:nemo -R $WORK_DIR
+
+    PATH=$PATH:/opt/openmpi-4.1.1/install/bin:/opt/hdf5/install/bin
+    LD_LIBRARY_PATH=/opt/hdf5/install/lib:$LD_LIBRARY_PATH
+    
     # These GIT_SSH_COMMAND options prevent prompts. Since we're root, not the user on the host who will (probably) have the SSH agent, we also need to pass the SSH_AUTH_SOCK environment
     # variable: SINGULARITYENV_SSH_AUTH_SOCK=$SSH_AUTH_SOCK
     GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone git@github.com:NOC-MSM/singularity-nemo.git
@@ -207,23 +190,17 @@ From: ubuntu:18.04
     mkdir /opt/xios
     mv /nemo/nemo/cfgs/GYRE_PISCES/EXP00/xios_server.exe /opt/xios/xios
 
-    chown -Rv nemo:nemo /nemo /opt
-    chmod -Rv 777 /nemo /opt
+    # make everything we've built be owned by `nemo` 
+    chown -Rv nemo:nemo /opt
+    
+    # directories + binaries executable, everything read only by g+o...
+    chmod -Rv 644 /opt
+    find /opt -type d -print0 | xargs -0 chmod -v 511
+    find /opt -type f -exec file -i {} + | grep ":[^:]*binary[^:]*$" |  sed 's/^\(.*\):[^:]*$/\1/' | xargs chmod -v 511
 
 %environment
     
-    #export ZDIR=/usr/local
-    #export NCDIR=/usr/local
-    #export NFDIR=/usr/local
-    #export WORK_DIR=/nemo
-    #export H5DIR=/usr/local
-    #export PATH=$PATH:/opt/openmpi-4.0.1/install/bin:/usr/local
-    #export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-
-    # do we need to add mpi lib?
-    # Add nemo / xios 
-    #PATH=/
-    # this is probably needed...
+    # this is needed - nemo is built dynamically (and openmpi, the other library needed, is dealt with in the wrapper script automagically)
     export LD_LIBRARY_PATH=/opt/hdf5/install/lib:$LD_LIBRARY_PATH
 
 %runscript
