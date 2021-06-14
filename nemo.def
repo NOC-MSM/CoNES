@@ -5,32 +5,9 @@ From: ubuntu:20.04
 #
 # Authors:      Chris Wood, EPCC, University of Edinburgh <c.wood@epcc.ed.ac.uk>; James Harle, National Oceanography Centre <jdha@noc.ac.uk>
 # Date:         2019-09-06
-# Last updated: 2020-21-04
+# Last updated: 2021-14-06
 #
-#   Unresolved issues / future work:
-#       - significant testing needed - does OpenMPI version on Cirrus need to the same as version in this def file?
-#       - do we _need_ to (should we) run all available `make [check|test]` for dependencies?
-#       - did I waste a lot of time working out how to compile dependencies from source? (David H suggested that some apt binaries might work, despite my comment below!)
-#       - we could change the workflow of all of this by creating individual docker files of all the dependencies (with same base OS image, probably something minimal? alpine?),
-#         doing a multistage build, and creating the singularity container from the final resultant docker container. Singularity doensn't (yet) allow multistage builds
-#           - however, it's not possible to pull multiple docker images in 1 recipe, so would need to do an incremental build which is probably too much effort for any benefit it would provide  
-#       - one of the issues I had running `make check` for hdf5 was with running it as root - mpiexec complains about this. I created the nemo user to run (with the side effect that
-#         it created a useful location - the home directory - to store some of the dependencies!). But I then had issues with adding the hdf5 libraries to search paths used by NetCDF, nemo, and xios,
-#         so changed --prefix from /home/nemo/hdf5 to /usr/local, but you can't install stuff to there without being root (or sudo, which isn't directly supported in a container). Way round it would be
-#         build in /home/nemo as nemo, then install as root, and switch back to nemo user? Is it worth it? But only need to worry about this if we want to run `make check`. Also had similar issues with
-#         NCDIR and NFDIR for NetCDF install directories (changed from /home/nemo/netcdf/install to /usr/local). If there's a way round it (and there's a reason to do it), then LD_LIBRARY_PATH and PATH
-#         will need to be set and updated
-#
-#         I also thought it would be useful to keep all the 3rd party dependencies in a separate place, rather than /usr/local, but maybe that's just being a bit OCD...
-#       - the nemo-singularity repo is currently private, so need to supply a username/password
-#       - I keep the def file in a different repo to the singularity nemo build because it is a different thing - someone running `singularity build` doesn't need the whole singularity-nemo repo (apart from
-#         inside the container) 
-#
-#       - note I currently change branch in the nemo singularity repo rather than use master
-####
-
-#%files
-#    /home/cwood/.ssh/authorized_keys /root/.ssh/authorized_keys
+###
 
 %post
 
@@ -90,29 +67,35 @@ From: ubuntu:20.04
     # compiling openmpi
     ##
 
-    mkdir -p /opt/openmpi-4.1.1 && cd $_
+    OPENMPI_DIR=/opt/openmpi
+    mkdir -p $OPENMPI_DIR
+    cd $OPENMPI_DIR
     wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.bz2
-    tar -xvjf openmpi-4.1.1.tar.bz2
+    mkdir openmpi
+    tar -xvjf openmpi-4.1.1.tar.bz2 -C openmpi --strip-components 1
     rm openmpi-4.1.1.tar.bz2
     
-    cd openmpi-4.1.1
+    cd openmpi
     ./configure CC=gcc CXX=g++ FC=gfortran --enable-mpi1-compatibility --prefix=/opt/openmpi-4.1.1/install --with-verbs --with-slurm --with-pmix
     make
     make install
     cd ..
-    rm -r openmpi-4.1.1 # removes the 303 mb directory
+    rm -r openmpi # removes the 303 mb directory
 
     ##
     # compile HDF5 libraries
     ##
 
-    mkdir -p /opt/hdf5 && cd $_
+    HDF_DIR=/opt/hdf5
+    mkdir -p $HDF_DIR
+    cd $HDF_DIR
     wget -O hdf5.tar.bz2 "https://www.hdfgroup.org/package/hdf5-1-12-0-tar-bz2/?wpdmdl=14584&refresh=60be563cf137e1623086652"
-    tar xjvf hdf5.tar.bz2
+    mkdir hdf
+    tar xjvf hdf5.tar.bz2 -C hdf --strip-components 1
     rm hdf5.tar.bz2
 
     H5DIR=/opt/hdf5/install
-    cd hdf5-1.12.0
+    cd hdf
 
     # n.b. --enable-fortran specifically not needed (https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html#build_default)
     CC=/opt/openmpi-4.1.1/install/bin/mpicc ./configure --prefix=${H5DIR} --enable-hl --enable-parallel --with-default-api-version=v18
@@ -122,20 +105,23 @@ From: ubuntu:20.04
     # make check -i RUNPARALLEL='-oversubscribe'
     make install
     cd .. 
-    rm -r hdf5-1.12.0 # removes the 212 mb directory
+    rm -r hdf # removes the 212 mb directory
 
     ##
     # compile NetCDF libraries
     ##
 
-    mkdir -p /opt/netcdf && cd $_
+    NETCDF_DIR=/opt/netcdf
+    mkdir -p $NETCDF_DIR
+    cd $NETCDF_DIR 
 
     # C libraries...
     wget -O netcdf.tar.gz https://github.com/Unidata/netcdf-c/archive/v4.8.0.tar.gz
-    tar xzvf netcdf.tar.gz
+    mkdir netcdf
+    tar xzvf netcdf.tar.gz -C netcdf --strip-components 1
     rm netcdf.tar.gz 
     
-    cd netcdf-c-4.8.0
+    cd netcdf
     NCDIR=/opt/netcdf/install
     
     CC=/opt/openmpi-4.1.1/install/bin/mpicc FC=/opt/openmpi-4.1.1/install/bin/mpifort CPPFLAGS="-I${H5DIR}/include" LDFLAGS="-L${H5DIR}/lib" ./configure --disable-shared --prefix=$NCDIR
@@ -144,20 +130,21 @@ From: ubuntu:20.04
     # make check
     make install
     cd .. 
-    rm -r netcdf-c-4.8.0 # removes the 125 mb directory
+    rm -r netcdf # removes the 125 mb directory
 
     # ...and the fortran libraries
     wget https://github.com/Unidata/netcdf-fortran/archive/v4.5.3.tar.gz
-    tar xzvf v4.5.3.tar.gz
+    mkdir netcdf
+    tar xzvf v4.5.3.tar.gz -C netcdf --strip-components 1
     rm v4.5.3.tar.gz
-    cd netcdf-fortran-4.5.3
+    cd netcdf
     NFDIR=/opt/netcdf/install
     
     CC=/opt/openmpi-4.1.1/install/bin/mpicc FC=/opt/openmpi-4.1.1/install/bin/mpifort CPPFLAGS="-I${NCDIR}/include -I${H5DIR}/include" LDFLAGS="-L${NCDIR}/lib -L${H5DIR}/lib" LIBS="-lhdf5 -lhdf5_hl -lcurl" ./configure --prefix=$NFDIR --disable-shared
     make
     make install
     cd ..
-    rm -r netcdf-fortran-4.5.3 # removes the 18 mb directory
+    rm -r netcdf # removes the 18 mb directory
 
     ##
     # Now we can install NEMO
@@ -166,7 +153,8 @@ From: ubuntu:20.04
     ln -s /opt/openmpi-4.1.1/install/bin/mpif90 /usr/bin/mpif90
 
     WORK_DIR=/nemo >> $SINGULARITY_ENVIRONMENT
-    mkdir $WORK_DIR && cd $_
+    mkdir $WORK_DIR
+    cd $WORK_DIR
     chown nemo:nemo -R $WORK_DIR
 
     PATH=$PATH:/opt/openmpi-4.1.1/install/bin:/opt/hdf5/install/bin
