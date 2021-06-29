@@ -181,10 +181,10 @@ From: ubuntu:20.04
     # make everything we've built be owned by `nemo` 
     chown -Rv nemo:nemo /opt
     
-    # directories + binaries executable, everything read only by g+o...
+    # minimal possible permissions: directories executable; binaries read + executable (need to be readable to that library headers can be read!); everything else only readable for g+o
     chmod -Rv 644 /opt
     find /opt -type d -print0 | xargs -0 chmod -v 511
-    find /opt -type f -exec file -i {} + | grep ":[^:]*binary[^:]*$" |  sed 's/^\(.*\):[^:]*$/\1/' | xargs chmod -v 511
+    find /opt -type f -exec file -i {} + | grep ":[^:]*binary[^:]*$" |  sed 's/^\(.*\):[^:]*$/\1/' | xargs chmod -v 555
 
 %environment
     
