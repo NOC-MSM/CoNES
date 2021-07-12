@@ -1,8 +1,7 @@
 # Containerisation of NEMO Employing Singularity (CoNES)
 
 ## Getting Started
-These instructions are based on those from 
-[https://github.com/singularityhub/singularity-deploy](Singularity Deploy)
+These instructions are based on those from [Singularity Deploy](https://github.com/singularityhub/singularity-deploy)
 
 ### 1. Write your Singularity Recipe(s)
 
