@@ -1,0 +1,195 @@
+#!/bin/bash
+# Lightweight script to set up NEMO
+ 
+display_usage() { 
+   echo
+   echo "  Auto-Config: NEMO in Singularity"
+   echo "  ***************************************"
+   echo
+   echo "  usage: ${0##*/} -w path_to_install_nemo -x path_to_intall_xios -s path_to_repo"
+   echo "                  -m machine -v version -c compiler"
+   echo
+   echo "  flags:  -w full path to where nemo will be installed"
+   echo "          -x full path to where xios will be installed"
+   echo "          -s full path to where AMM7 repository resides"
+   echo "          -m machine on which to compile code"
+   echo "          -v which version of NEMO to check out"
+   echo "          -c which compiler to use"
+   echo
+   exit 1
+	} 
+# if less than three arguments supplied, display usage 
+	if [  $# -le 11 ] 
+	then 
+		display_usage
+		exit 1
+	fi 
+# if less than two arguments supplied, display usage 
+	if [  $# -ge 13 ] 
+	then 
+		display_usage
+		exit 1
+	fi 
+# check whether user had supplied -h or --help . If yes display usage 
+	if [[ ( $# == "--help") ||  $# == "-h" ]] 
+	then 
+		display_usage
+		exit 0
+	fi 
+
+while getopts w:x:s:m:v:c: option
+  do
+  case "${option}"
+  in
+  w) export WORK_DIR=${OPTARG};;
+  x) export XIOS_DIR=${OPTARG};;
+  s) export REPO_DIR=${OPTARG};;
+  m) export HPC_TARG=${OPTARG};;
+  v) export NEMO_VER=${OPTARG};;
+  c) export COMPILER=${OPTARG};;
+  esac
+done
+
+if [ ${WORK_DIR:0:1} != "/" ]; then
+  echo "WORK_DIR must use full path"
+  exit 1
+fi
+
+if [ ${XIOS_DIR:0:1} != "/" ]; then
+  echo "XIOS_DIR must use full path"
+  exit 1
+fi
+
+if [ ${REPO_DIR:0:1} != "/" ]; then
+  echo "REPO_DIR must use full path"
+  exit 1
+fi
+
+# Change to some working directory of choice
+if [ ! -d "$WORK_DIR" ]; then
+  mkdir $WORK_DIR
+fi
+cd $WORK_DIR
+
+echo "Making sure that the correct modules are loaded"
+
+case "${NEMO_VER}"
+  in
+  4.0.2)   echo "NEMO Version 4.0.2 will be checked out"
+           ;;
+  4.0.3)   echo "NEMO Version 4.0.3 will be checked out"
+           ;;
+  4.0.4)   echo "NEMO Version 4.0.4 will be checked out"
+           ;;
+  4.0.5)   echo "NEMO Version 4.0.5 will be checked out"
+           ;;
+  4.0.6)   echo "NEMO Version 4.0.6 will be checked out"
+           ;;
+  trunk)   echo "NEMO trunk will be checked out"
+           ;;
+  *)       echo "NEMO Version not recognised"
+           echo "Versions available: 4.0.2, 4.0.3, 4.0.4, 4.0.5, 4.0.6 and trunk"
+           exit 1
+esac
+
+# Checkout the NEMO code from the SVN Paris repository
+echo "Checking out NEMO repository"
+case "${NEMO_VER}"
+  in
+  trunk)   svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/trunk --depth empty nemo
+           svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/trunk/src --depth infinity nemo/src
+           svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/trunk/cfgs/SHARED nemo/cfgs/SHARED
+           svn export http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/trunk/cfgs/ref_cfgs.txt nemo/cfgs/ref_cfgs.txt
+           ;;
+  *)       svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER --depth empty nemo
+           svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER/src --depth infinity nemo/src
+           svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER/cfgs/SHARED nemo/cfgs/SHARED
+           svn export http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER/cfgs/ref_cfgs.txt nemo/cfgs/ref_cfgs.txt
+           ;;
+esac
+
+cd nemo
+
+# Now check EXTERNALS revision number before checking out the rest
+for ext_name in mk FCM IOIPSL
+  do
+  ext=`svn propget svn:externals | grep $ext_name | cut -c2-`
+  svn co http://forge.ipsl.jussieu.fr/nemo/svn/$ext
+done
+
+ext=`svn propget svn:externals | grep makenemo | cut -c2-`
+svn export http://forge.ipsl.jussieu.fr/nemo/svn/$ext
+
+mkdir arch
+
+# Setup the directory structure 
+mkdir $WORK_DIR/nemo/cfgs/NEMO
+
+echo $XIOS_DIR
+# Choose an appropriate directory for your XIOS installation
+if [ ! -d "$XIOS_DIR" ]; then
+  mkdir $XIOS_DIR
+fi
+cd $XIOS_DIR
+echo $PWD
+echo "Checking out xios repository"
+case "${NEMO_VER}"
+  in
+  4.0.2)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
+           ;;
+  4.0.3)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
+           ;;
+  4.0.4)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
+           ;;
+  4.0.5)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
+           ;;
+  4.0.6)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
+           ;;
+  trunk)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
+           ;;
+  *)       echo "NEMO Version not recognised"
+           echo "Versions available: 4.0.2, 4.0.3, 4.0.4, 4.0.5, 4.0.6 and trunk"
+           exit 1
+esac
+
+cd xios
+
+cp /input_files/arch/xios/arch* ./arch
+
+echo "Compiling xios"
+./make_xios --full --prod --arch singularity --netcdf_lib netcdf4_par -j 8
+
+# Let's update the path to xios
+export XIOS_DIR=$XIOS_DIR/xios
+
+[ -f $XIOS_DIR/bin/xios_server.exe ] || exit 1
+
+cd $WORK_DIR/nemo
+cp /input_files/arch/nemo/arch* ./arch
+
+echo 'NEMO OCE' >> $WORK_DIR/nemo/cfgs/work_cfgs.txt
+
+export CONFIG_DIR=$WORK_DIR/nemo/cfgs/NEMO
+
+cd $CONFIG_DIR
+tar xvfz /input_files/MY_SRC.tar.gz 
+
+# Need to put case $VERSION HERE
+echo "bld::tool::fppkeys key_mpp_mpi key_nosignedzero key_iomput" >  $CONFIG_DIR/cpp_NEMO.fcm
+
+cd $WORK_DIR/nemo
+
+echo "Compiling nemo AMM7 Config"
+./makenemo -m singularity -r NEMO -j 8
+
+cd cfgs/NEMO/EXP00
+
+# Tidy up
+cp $XIOS_DIR/bin/xios_server.exe ./
+rm -rf $XIOS_DIR
+#cp $REPO_DIR/EXP00_GYRE_PISCES/* ./
+# TODO: do we need to add in all the sym links to namelist + xml etc?
+rm nemo
+cp ../BLD/bin/nemo.exe nemo
+rm -rf ../BLD ../WORK
+rm -rf $WORK_DIR/nemo/src
