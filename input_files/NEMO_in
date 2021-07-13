@@ -3,3 +3,4 @@ NEMO_VERSION=4.0.4             # Check that VERSION is 4.0.[2-6], 4.0_HEAD or tr
 XIOS_REVISION=                 # Use default value if empty
 NEMO_COMPONENTS='OCE'
 CPP_KEYS=
+MPI=						   # Which MPI implementation to use; valid options are currently MPICH (which installs v) or OMPI (which installs v4.1.1)
