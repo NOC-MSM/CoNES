@@ -4,27 +4,46 @@
 Introduction to CoNES
 =====================
 
-Containerisation of NEMO Employing Singularity (CoNES) is an [eCSE](eCSE)
-funded project to develop and document methods of containerisation for the NEMO 
-Ocean General Circulation Model the on [ARCHER2 HPC service](www.archer2.ac.uk], 
-using [Singularity](sylabs.io).
+.. _eCSE: https://www.archer2.ac.uk/ecse/
+.. _`ARCHER2 HPC service`: www.archer2.ac.uk
+.. _Singularity: sylabs.io
+.. _NEMO: www.nemo-ocean.eu
 
-The Nucleus for European Modelling of the Ocean (NEMO) is a 
-framework for ocean and climate modelling ([www.nemo-ocean.eu](www.nemo-ocean.eu)). 
+Containerisation of NEMO Employing Singularity (CoNES) is an eCSE_
+funded project to develop and document methods of containerisation for the NEMO 
+Ocean General Circulation Model the on `ARCHER2 HPC service`_, 
+using Singularity_.
+
+----
+NEMO
+----
+
+The Nucleus for European Modelling of the Ocean (NEMO_) is a 
+framework for ocean and climate modelling. 
 The ocean component of NEMO is a primitive equation model employed
 for a range of idealised, regional and global ocean circulation studies. 
 It provides a flexible tool for studying the ocean and the wider earth 
 climate system over a wide range of space and time scales. 
 
+-----------
+Singularity
+-----------
+
 Singularity is a *container* that allows you to create and run
 pieces of software in a way that is portable and reproducible. 
-_You can build a container using Singularity
+*You can build a container using Singularity
 on your laptop, and then run it on many of the largest HPC clusters in
 the world, local university or company clusters, a single server, in
-the cloud, or on a workstation down the hall_. A Singularity container
+the cloud, or on a workstation down the hall*. A Singularity container
 is a single file, containing all the software needed to run a
 scientific experiment on a vast array of different operating systems.
 
+Why use containers?
+===================
+
+  - Runtime environment is independant of the host
+  - Highly configurable
+  - Removes the setup and compilation issues faced by the user
 
 Why use Singularity?
 ======================
@@ -36,18 +55,11 @@ Why use Singularity?
   - Easily make use of GPUs, high speed
     networks, parallel filesystems on a cluster or server by default.
 
-Why use containers?
-===================
-
-  - Runtime environment is independant of the host
-  - Highly configurable
-  - Removes the setup and compilation issues faced by the user
-
 Work-flows for research can be a complicated and
 iterative process, and even more so on a shared and somewhat
 rigid production environment. Singularity provides a flexible 
 working environment for development and production. It can even
-be used as distributed tool for teaching, abstracting the overhead 
+be used as distributed tool for teaching, removing the overhead 
 of setting up software in new environments.
 
 --------------------
