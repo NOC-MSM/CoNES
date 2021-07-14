@@ -19,6 +19,9 @@ This Guide will outline running on ARCHER2 HPC Service.
 Quick Installation Steps
 ------------------------
 
+In this guide we will be using NEMO AMM7 as the example on ARCHER2
+The config files for this make use of HPC_Scaling_AMM7
+
 The simplest way to get up and running is to download a pre-build NEMO SIF.
 You will need a Linux system that is has an up-to-date Singularity installation
 
@@ -29,6 +32,14 @@ Linux installation optionrs are discussed in the `installation section of the
 admin guide
 <https://sylabs.io/guides/e\{adminversion\}/admin-guide/installation.html>`__.
 
+Setting up the run directory
+============================
+
+.. code-block:: none
+
+   git clone HPC_Scaling_AMM7
+
+
 Downloading the latest NEMO SIF
 ===============================
 
@@ -37,17 +48,7 @@ You must first install development libraries to your host. Assuming Ubuntu
 
 .. code-block:: none
 
-    $ sudo apt-get update && sudo apt-get install -y \
-        build-essential \
-        libssl-dev \
-        uuid-dev \
-        libgpgme11-dev \
-        squashfs-tools \
-        libseccomp-dev \
-        wget \
-        pkg-config \
-        git \
-        cryptsetup
+    wget -c https://github.com/NOC-MSM/CoNES/releases/download/0.0.1/NOC-MSM-CoNES.nemo.sif -o nemo.sif
 
 .. note::
     Note that ``squashfs-tools`` is only a dependency for commands that build
