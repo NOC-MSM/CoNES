@@ -77,7 +77,8 @@ From: ubuntu:20.04
                    zlib1g-dev \
                    libibverbs-dev \
                    libpmix-dev \
-                   libslurm-dev
+                   libslurm-dev \
+                   crudini
 
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 
     update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-10 100
@@ -102,20 +103,44 @@ From: ubuntu:20.04
     # compiling openmpi
     ##
 
-    OPENMPI_DIR=/opt/openmpi
-    mkdir -p $OPENMPI_DIR
-    cd $OPENMPI_DIR
-    wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.bz2
-    mkdir openmpi
-    tar -xvjf openmpi-4.1.1.tar.bz2 -C openmpi --strip-components 1
-    rm openmpi-4.1.1.tar.bz2
-    cd openmpi
-    
-    ./configure CC=gcc CXX=g++ FC=gfortran --enable-mpi1-compatibility --prefix=/opt/openmpi-4.1.1/install --with-verbs --with-slurm --with-pmix
-    make
-    make install
-    cd ..
-    rm -r openmpi # removes the 303 mb directory
+    MPI=`crudini --get /input_files/NEMO_in DEFAULT MPI`
+
+    MPI_DIR=/opt/mpi
+    mkdir -p $MPI_DIR
+    cd $MPI_DIR
+    mkdir mpi
+
+    if [ "$MPI" = "MPICH" ]
+    then
+
+        apt install -y libfabric-dev
+
+        wget http://www.mpich.org/static/downloads/3.4.2/mpich-3.4.2.tar.gz
+        tar -xvzf mpich-3.4.2.tar.gz -C mpi --strip-components 1
+        rm mpich-3.4.2.tar.gz
+        cd mpi
+
+        ./configure CC=gcc CXX=g++ FC=gfortran --prefix=/opt/mpi/install FFLAGS=-fallow-argument-mismatch
+        make
+        make install
+
+    else
+
+        echo "No MPI implementation specified, so let's install OpenMPI"
+
+        wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.bz2
+        tar -xvjf openmpi-4.1.1.tar.bz2 -C mpi --strip-components 1
+        rm openmpi-4.1.1.tar.bz2
+        cd mpi
+        
+        ./configure CC=gcc CXX=g++ FC=gfortran --enable-mpi1-compatibility --prefix=/opt/mpi/install --with-verbs --with-slurm --with-pmix
+        make
+        make install
+
+    fi
+
+    cd /opt/mpi
+    rm -r mpi # removes the 303 mb directory
 
     ##
     # compile HDF5 libraries
@@ -133,7 +158,7 @@ From: ubuntu:20.04
     cd hdf
 
     # n.b. --enable-fortran specifically not needed (https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html#build_default)
-    CC=/opt/openmpi-4.1.1/install/bin/mpicc ./configure --prefix=${H5DIR} --enable-hl --enable-parallel --with-default-api-version=v18
+    CC=/opt/mpi/install/bin/mpicc ./configure --prefix=${H5DIR} --enable-hl --enable-parallel --with-default-api-version=v18
     make
     # maybe we shouldn't bother with make check - it complains about a lot and we're not actually building on a parallel file system
     # so some of the checks are totally irrelevant
@@ -159,7 +184,7 @@ From: ubuntu:20.04
     cd netcdf
     NCDIR=/opt/netcdf/install
     
-    CC=/opt/openmpi-4.1.1/install/bin/mpicc FC=/opt/openmpi-4.1.1/install/bin/mpifort CPPFLAGS="-I${H5DIR}/include" LDFLAGS="-L${H5DIR}/lib" ./configure --disable-shared --prefix=$NCDIR
+    CC=/opt/mpi/install/bin/mpicc FC=/opt/mpi/install/bin/mpifort CPPFLAGS="-I${H5DIR}/include" LDFLAGS="-L${H5DIR}/lib" ./configure --disable-shared --prefix=$NCDIR
     make
     # make check fails; maybe we should avoid running it (only 1 response from a question on the netcdf mailing list, saying it is really finicky) 
     # make check
@@ -175,7 +200,7 @@ From: ubuntu:20.04
     cd netcdf
     NFDIR=/opt/netcdf/install
     
-    CC=/opt/openmpi-4.1.1/install/bin/mpicc FC=/opt/openmpi-4.1.1/install/bin/mpifort CPPFLAGS="-I${NCDIR}/include -I${H5DIR}/include" LDFLAGS="-L${NCDIR}/lib -L${H5DIR}/lib" LIBS="-lhdf5 -lhdf5_hl -lcurl" ./configure --prefix=$NFDIR --disable-shared
+    CC=/opt/mpi/install/bin/mpicc FC=/opt/mpi/install/bin/mpifort CPPFLAGS="-I${NCDIR}/include -I${H5DIR}/include" LDFLAGS="-L${NCDIR}/lib -L${H5DIR}/lib" LIBS="-lhdf5 -lhdf5_hl -lcurl" ./configure --prefix=$NFDIR --disable-shared
     make
     make install
     cd ..
@@ -185,14 +210,14 @@ From: ubuntu:20.04
     # Now we can install NEMO
     ##
 
-    ln -s /opt/openmpi-4.1.1/install/bin/mpif90 /usr/bin/mpif90
+    ln -s /opt/mpi/install/bin/mpif90 /usr/bin/mpif90
 
     WORK_DIR=/nemo >> $SINGULARITY_ENVIRONMENT
     mkdir $WORK_DIR
     cd $WORK_DIR
     chown nemo:nemo -R $WORK_DIR
 
-    PATH=$PATH:/opt/openmpi-4.1.1/install/bin:/opt/hdf5/install/bin
+    PATH=$PATH:/opt/mpi/install/bin:/opt/hdf5/install/bin
     LD_LIBRARY_PATH=/opt/hdf5/install/lib:$LD_LIBRARY_PATH
    
     cd $WORK_DIR
