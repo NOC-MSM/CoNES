@@ -11,6 +11,7 @@ on a HPC cluster or Linux machine that has Singularty installed. It should also
 be possible to build and run a NEMO SIF on MacOS/Windows machines. For further 
 information on installing and using Singularity on different architecture 
 please refer to the `Sylabs instalation guides <https://sylabs.io/guides/>`.
+This Guide will outline running on ARCHER2 HPC Service.
 
 .. _running:
 
