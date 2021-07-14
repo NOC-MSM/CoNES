@@ -140,7 +140,7 @@ From: ubuntu:20.04
     fi
 
     cd /opt/mpi
-    rm -r openmpi # removes the 303 mb directory
+    rm -r mpi # removes the 303 mb directory
 
     ##
     # compile HDF5 libraries
