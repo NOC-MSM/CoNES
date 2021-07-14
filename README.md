@@ -1,4 +1,5 @@
 # Containerisation of NEMO Employing Singularity (CoNES)
+[![Documentation Status](https://readthedocs.org/projects/cones/badge/?version=latest)](https://cones.readthedocs.io/en/latest/?badge=latest)
 
 ## Getting Started
 These instructions are based on those from [Singularity Deploy](https://github.com/singularityhub/singularity-deploy)
