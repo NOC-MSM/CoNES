@@ -21,14 +21,16 @@ import sphinx_rtd_theme  # noqa: F401
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
 sys.path.insert(0, os.path.abspath("../"))
-import pydomcfg  # noqa: E402 F401
+import CoNES  # noqa: E402 F401
 
+# The master toctree document.
+master_doc = 'index'
 
 # -- Project information -----------------------------------------------------
 
-project = "pyDOMCFG"
-copyright = "2021, pyNEMO Team"
-author = "pyNEMO Team"
+project = "CoNES"
+copyright = "2021, eCSE"
+author = "James Harle"
 
 
 # -- General configuration ---------------------------------------------------
@@ -49,7 +51,7 @@ extensions = [
 
 # GitHub links
 extlinks = {
-    "pr": ("https://github.com/pyNEMO/pyDOMCFG/pull/%s", "PR#"),
+    "pr": ("https://github.com/NOC-MSM/CoNES/pull/%s", "PR#"),
 }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -67,6 +69,9 @@ autodoc_typehints = "none"
 # Do not warn about missing "Methods" in class docstring
 numpydoc_show_class_members = False
 
+# The name of the Pygments (syntax highlighting) style to use.
+pygments_style = 'sphinx'
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -79,9 +84,36 @@ html_theme = "sphinx_rtd_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
+html_theme_options = {
+    'sticky_navigation': True,
+    'includehidden': True,
+    'navigation_depth': 5,
+    'prev_next_buttons_location': 'bottom',
+    'style_external_links': True,
+}
+
+html_context = {
+    'display_github': True,
+    'github_user': 'NOC-MSM',
+    'github_repo': 'CoNES',
+    'github_version': 'main',
+    'conf_py_path': '/',
+}
+
 # Logos
-html_logo = "_static/pyNEMO.png"
-html_favicon = "_static/pyNEMO_favicon.png"
+html_logo = "_static/CoNES_logo.png"
+html_favicon = "_static/CoNES_favicon.png"
 html_theme_options = {
     "style_nav_header_background": "#343131",
 }
+
+# -- Custom lexer ---------------------------------------------------------
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
+from sphinx.highlighting import lexers
+from pygments_singularity import SingularityLexer
+from pygments_json import JSONLexer
+from replacements import *
+# lexer for Singularity definition files (added here until it is upstreamed into Pygments).
+lexers['singularity'] = SingularityLexer(startinline=True)
+lexers['json'] = JSONLexer(startinline=True)
