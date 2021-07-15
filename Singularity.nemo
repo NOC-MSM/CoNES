@@ -103,7 +103,17 @@ From: ubuntu:20.04
     # compiling openmpi
     ##
 
-    MPI=`crudini --get /input_files/NEMO_in DEFAULT MPI`
+    # MPI=`crudini --get /input_files/NEMO_in DEFAULT MPI` # For some reason this yanks the whole line including comments
+    
+    . /input_files/NEMO_in
+
+    if [ -z "$MPI" ] && [ "$MPI_SWAP" = "MPICH" ]
+    then
+        MPI="MPICH"
+    elif [ -z "$MPI" ] && [ "$MPI_SWAP" = "OMPI" ]
+    then
+        MPI="OMPI"
+    fi
 
     MPI_DIR=/opt/mpi
     mkdir -p $MPI_DIR
@@ -124,9 +134,8 @@ From: ubuntu:20.04
         make
         make install
 
-    else
-
-        echo "No MPI implementation specified, so let's install OpenMPI"
+    elif [ "$MPI" = "OMPI" ]
+    then
 
         wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.bz2
         tar -xvjf openmpi-4.1.1.tar.bz2 -C mpi --strip-components 1
@@ -136,7 +145,9 @@ From: ubuntu:20.04
         ./configure CC=gcc CXX=g++ FC=gfortran --enable-mpi1-compatibility --prefix=/opt/mpi/install --with-verbs --with-slurm --with-pmix
         make
         make install
-
+    else
+       echo "No MPI implementation specified"
+       exit 1
     fi
 
     cd /opt/mpi
