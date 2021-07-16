@@ -41,19 +41,25 @@ scientific experiment on a vast array of different operating systems.
 Why use containers?
 ===================
 
-  - Runtime environment is independant of the host
-  - Highly configurable
-  - Removes the setup and compilation issues faced by the user
+*  Runtime environment is independant of the host
+
+*  Highly configurable
+
+*  Removes the setup and compilation issues faced by the user
 
 Why use Singularity?
 ======================
 
-  - Singularity can run complex applications on HPC clusters.
-  - Open source
-  - Widely used in many areas of academia
-  - Portability, reproducibility and secure
-  - Easily make use of GPUs, high speed
-    networks, parallel filesystems on a cluster or server by default.
+*  Singularity can run complex applications on HPC clusters.
+
+*  Open source
+
+*  Widely used in many areas of academia
+
+*  Portability, reproducibility and secure
+
+*  Easily make use of GPUs, high speed
+   networks, parallel filesystems on a cluster or server by default.
 
 Work-flows for research can be a complicated and
 iterative process, and even more so on a shared and somewhat
