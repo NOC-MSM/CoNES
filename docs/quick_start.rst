@@ -4,22 +4,25 @@
 Quick Start
 ===========
 
-.. _sec:quickstart:
+.. _eCSE: https://www.archer2.ac.uk/ecse/
+.. _`ARCHER2 HPC service`: www.archer2.ac.uk
+.. _Singularity: sylabs.io
+.. _`Singularity Guide`: https://sylabs.io/guides/
+.. _NEMO: www.nemo-ocean.eu
 
-This guide is intended for bulding/running a NEMO Singularity Image File (SIF) 
+This guide is intended for running a NEMO Singularity Image File (SIF) 
 on a HPC cluster or Linux machine that has Singularty installed. It should also 
 be possible to build and run a NEMO SIF on MacOS/Windows machines. For further 
 information on installing and using Singularity on different architecture 
-please refer to the `Sylabs instalation guides <https://sylabs.io/guides/>`.
-This Guide will outline running on ARCHER2 HPC Service.
+please refer to the `Singularity Guide`_.
 
-.. _running:
+An outline how to setup, download and run a NEMO SIF on the
+`ARCHER2 HPC Service`_ follows. This example uses the `NEMO AMM7 
+configuration <https://github.com/NOC-MSM/HPC_Scaling_AMM7>`_. 
 
-------------------------
-Quick Installation Steps
-------------------------
 
-In this guide we will be using NEMO AMM7 as the example on ARCHER2
+
+as the example on ARCHER2
 The config files for this make use of HPC_Scaling_AMM7
 
 The simplest way to get up and running is to download a pre-build NEMO SIF.
@@ -41,7 +44,10 @@ Setting up the environment
 
 .. code-block:: none
 
-   git clone HPC_Scaling_AMM7
+   git clone https://github.com/NOC-MSM/HPC_Scaling_AMM7
+   HPC_Scaling_AMM7/scripts/setup/amm7_setup -w $PWD/rundir -x $PWD/test \
+                                             -s $PWD/HPC_Scaling_AMM7 \
+                                             -m archer2 -v sing -c gnu
 
 
 ------------------------
