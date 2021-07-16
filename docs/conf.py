@@ -20,9 +20,6 @@ import sphinx_rtd_theme  # noqa: F401
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-sys.path.insert(0, os.path.abspath("../"))
-import CoNES  # noqa: E402 F401
-
 # The master toctree document.
 master_doc = 'index'
 
@@ -113,7 +110,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 from sphinx.highlighting import lexers
 from pygments_singularity import SingularityLexer
 from pygments_json import JSONLexer
-from replacements import *
+# from replacements import *
 # lexer for Singularity definition files (added here until it is upstreamed into Pygments).
 lexers['singularity'] = SingularityLexer(startinline=True)
 lexers['json'] = JSONLexer(startinline=True)
