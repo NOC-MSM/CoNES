@@ -53,10 +53,10 @@ jobs:
                 # For each Singularity* container, build based on the prefix (tag) 
                 for recipe in $(ls Singularity*); do
                     echo "Building $recipe"
-                    tag=$(echo "${recipe/Singularity\./}")
+                    tag=$(echo "${recipe/Singularity\./}")-mpich
                     # If we find empty, use latest
                     if [ "$tag" == "Singularity" ]; then
-                        tag=latest
+                        tag=latest-mpich
                     fi
                     # Build the container and name by tag
                     echo "Tag is $tag."
@@ -74,8 +74,8 @@ jobs:
         if: ${{ env.release_tag != env.latest_tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          upload_url: ${{ steps.create_release.outputs.upload_url }}-mpich
-          tag_name: ${{ env.release_tag }}-mpich
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          tag_name: ${{ env.release_tag }}
         run: |
           . input_files/NEMO_in
           if [ -z "$MPI" ] || [ "$MPI" = "MPICH" ]; then
@@ -91,10 +91,10 @@ jobs:
                 # For each Singularity* container, build based on the prefix (tag) 
                 for recipe in $(ls Singularity*); do
                     echo "Building $recipe"
-                    tag=$(echo "${recipe/Singularity\./}")
+                    tag=$(echo "${recipe/Singularity\./}")-ompi
                     # If we find empty, use latest
                     if [ "$tag" == "Singularity" ]; then
-                        tag=latest
+                        tag=latest-ompi
                     fi
                     # Build the container and name by tag
                     echo "Tag is $tag."
