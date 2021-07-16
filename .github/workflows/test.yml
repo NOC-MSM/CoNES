@@ -1,0 +1,68 @@
+name: singularity-deploy-test
+
+# run on creation of a release tag
+on:
+  pull_request: []
+
+jobs:
+  builder:
+    name: Test Container Builds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - uses: eWaterCycle/setup-singularity@v6
+        with:
+          singularity-version: 3.7.1
+      - name: Build the MPICH singularity container
+        run: |
+            repo=$(echo "${GITHUB_REPOSITORY/\//-}")
+            . input_files/NEMO_in
+            # Only build MPICH if required
+            if [ -z "$MPI" ] || [ "$MPI" = "MPICH" ]; then
+                # For each Singularity* container, build based on the prefix (tag) 
+                for recipe in $(ls Singularity*); do
+                    echo "Building $recipe"
+                    tag=$(echo "${recipe/Singularity\./}")
+                    # If we find empty, use latest
+                    if [ "$tag" == "Singularity" ]; then
+                        tag=latest
+                    fi
+                    # Build the container and name by tag
+                    echo "Tag is $tag."
+                    container="$repo:$tag.sif"
+                    SINGULARITYENV_MPI_SWAP=MPICH singularity build --fakeroot container.sif "$recipe"
+                    if [ "$?" == "0" ]; then
+                        echo "Successfully built container $container."                
+                        mv container.sif "$container"
+                    else
+                        echo "There was an issue building $container."          
+                    fi                
+                done
+            fi 
+      - name: Build the openMPI singularity container
+        run: |
+            repo=$(echo "${GITHUB_REPOSITORY/\//-}")
+            . input_files/NEMO_in
+            # Only build OMPI if required
+            if [ -z "$MPI" ] || [ "$MPI" = "OMPI" ]; then
+                # For each Singularity* container, build based on the prefix (tag) 
+                for recipe in $(ls Singularity*); do
+                    echo "Building $recipe"
+                    tag=$(echo "${recipe/Singularity\./}")
+                    # If we find empty, use latest
+                    if [ "$tag" == "Singularity" ]; then
+                        tag=latest
+                    fi
+                    # Build the container and name by tag
+                    echo "Tag is $tag."
+                    container="$repo:$tag.sif"
+                    SINGULARITYENV_MPI_SWAP=OMPI singularity build --fakeroot container.sif "$recipe"
+                    if [ "$?" == "0" ]; then
+                        echo "Successfully built container $container."                
+                        mv container.sif "$container"
+                    else
+                        echo "There was an issue building $container."          
+                    fi                
+                done
+            fi
