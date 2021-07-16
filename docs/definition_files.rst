@@ -809,3 +809,48 @@ When crafting your recipe, it is best to consider the following:
 #. Build production containers from a definition file instead of a sandbox that
    has been manually changed. This ensures the greatest possibility of
    reproducibility and mitigates the "black box" effect.
+
+
+
+-------------------------
+Build images from scratch
+-------------------------
+
+.. _sec:buildimagesfromscratch:
+
+{Singularity} v3.0 and above produces immutable images in the Singularity Image File (SIF)
+format. This ensures reproducible and verifiable images and allows for many
+extra benefits such as the ability to sign and verify your containers.
+
+However, during testing and debugging you may want an image format that is
+writable. This way you can ``shell`` into the image and install software and
+dependencies until you are satisfied that your container will fulfill your
+needs. For these scenarios, {Singularity} also supports the ``sandbox`` format
+(which is really just a directory).
+
+Sandbox Directories
+===================
+
+To build into a ``sandbox`` (container in a directory) use the
+``build --sandbox`` command and option:
+
+.. code-block:: none
+
+    $ sudo singularity build --sandbox ubuntu/ library://ubuntu
+
+This command creates a directory called ``ubuntu/`` with an entire Ubuntu
+Operating System and some {Singularity} metadata in your current working
+directory.
+
+You can use commands like ``shell``, ``exec`` , and ``run`` with this directory
+just as you would with a {Singularity} image. If you pass the ``--writable``
+option when you use your container you can also write files within the sandbox
+directory (provided you have the permissions to do so).
+
+.. code-block:: none
+
+    $ sudo singularity exec --writable ubuntu touch /foo
+
+    $ singularity exec ubuntu/ ls /foo
+    /foo
+
