@@ -31,35 +31,34 @@ Singularity
 
 Singularity is a *container* that allows you to create and run
 pieces of software in a way that is portable and reproducible. 
-*You can build a container using Singularity
-on your laptop, and then run it on many of the largest HPC clusters in
-the world, local university or company clusters, a single server, in
-the cloud, or on a workstation down the hall*. A Singularity container
-is a single file, containing all the software needed to run a
-scientific experiment on a vast array of different operating systems.
+They can be built on a laptop/desktop, and then run on a HPC service, 
+local cluster, a single server, in the cloud, and most workstations. 
+A Singularity container is a single file, containing all the software 
+needed to run a scientific experiment on a vast array of different 
+operating systems.
 
 Why use containers?
 ===================
 
-*  Runtime environment is independant of the host
+ *  Runtime environment is independant of the host.
 
-*  Highly configurable
+ *  Highly configurable.
 
-*  Removes the setup and compilation issues faced by the user
+ *  Removes the setup and compilation issues faced by the user.
 
 Why use Singularity?
 ======================
 
-*  Singularity can run complex applications on HPC clusters.
+ *  Singularity can run complex applications on HPC clusters.
 
-*  Open source
+ *  Open source.
 
-*  Widely used in many areas of academia
+ *  Widely used in many areas of academia.
 
-*  Portability, reproducibility and secure
+ *  Portability, reproducibility and secure.
 
-*  Easily make use of GPUs, high speed
-   networks, parallel filesystems on a cluster or server by default.
+ *  Easily make use of GPUs, high speed
+    networks, parallel filesystems on a cluster or server by default.
 
 Work-flows for research can be a complicated and
 iterative process, and even more so on a shared and somewhat
