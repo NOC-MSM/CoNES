@@ -113,7 +113,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          tag_name: ${{ env.release_tag }}-ompi
+          tag_name: ${{ env.release_tag }}
         run: |
           . input_files/NEMO_in
           if [ -z "$MPI" ] || [ "$MPI" = "OMPI" ]; then
