@@ -70,17 +70,6 @@ jobs:
                     fi                
                 done
             fi 
-      - name: Upload Release Assets for MPICH
-        if: ${{ env.release_tag != env.latest_tag }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          tag_name: ${{ env.release_tag }}
-        run: |
-          . input_files/NEMO_in
-          if [ -z "$MPI" ] || [ "$MPI" = "MPICH" ]; then
-              hub release edit $(find . -type f -name "*.sif" -printf "-a %p ") -m "" "$tag_name" 
-          fi
       - name: Build the OMPI singularity container
         if: ${{ env.release_tag != env.latest_tag }}
         run: |
@@ -108,14 +97,11 @@ jobs:
                     fi                
                 done
             fi 
-      - name: Upload Release Assets for OMPI
+      - name: Upload Release Assets
         if: ${{ env.release_tag != env.latest_tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           tag_name: ${{ env.release_tag }}
         run: |
-          . input_files/NEMO_in
-          if [ -z "$MPI" ] || [ "$MPI" = "OMPI" ]; then
-              hub release edit $(find . -type f -name "*.sif" -printf "-a %p ") -m "" "$tag_name" 
-          fi  
+          hub release edit $(find . -type f -name "*.sif" -printf "-a %p ") -m "" "$tag_name" 
