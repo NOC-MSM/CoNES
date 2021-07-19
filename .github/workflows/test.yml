@@ -11,10 +11,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Get specific changed files
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v8.9
+        with:
+          files: |
+            Singularity.nemo
+            input_files
+            .github/workflows
       - uses: eWaterCycle/setup-singularity@v6
         with:
           singularity-version: 3.7.1
       - name: Build the MPICH singularity container
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: |
             repo=$(echo "${GITHUB_REPOSITORY/\//-}")
             . input_files/NEMO_in
@@ -41,6 +50,7 @@ jobs:
                 done
             fi 
       - name: Build the openMPI singularity container
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: |
             repo=$(echo "${GITHUB_REPOSITORY/\//-}")
             . input_files/NEMO_in
