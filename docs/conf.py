@@ -78,8 +78,8 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 
 # Logos
-html_logo = "CoNES_logo.png"
-html_favicon = "CoNES_favicon.png"
+html_logo = "_static/CoNES_logo.png"
+html_favicon = "_static/CoNES_favicon.png"
 html_theme_options = {
     "style_nav_header_background": "#343131",
 }
