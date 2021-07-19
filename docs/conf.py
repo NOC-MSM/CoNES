@@ -78,19 +78,19 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 
 # Logos
-html_logo = "_static/CoNES_logo.png"
-html_favicon = "_static/CoNES_favicon.png"
+html_logo = "_static/cones_logo.png"
+html_favicon = "cones_favicon.png"
 html_theme_options = {
     "style_nav_header_background": "#343131",
 }
 
 # -- Custom lexer ---------------------------------------------------------
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
-from sphinx.highlighting import lexers
-from pygments_singularity import SingularityLexer
-from pygments_json import JSONLexer
-# from replacements import *
-# lexer for Singularity definition files (added here until it is upstreamed into Pygments).
-lexers['singularity'] = SingularityLexer(startinline=True)
-lexers['json'] = JSONLexer(startinline=True)
+#sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
+#from sphinx.highlighting import lexers
+#from pygments_singularity import SingularityLexer
+#from pygments_json import JSONLexer
+## from replacements import *
+## lexer for Singularity definition files (added here until it is upstreamed into Pygments).
+#lexers['singularity'] = SingularityLexer(startinline=True)
+#lexers['json'] = JSONLexer(startinline=True)
