@@ -65,49 +65,6 @@ jobs:
           path: _build/html
           destination: html
 
-  make_pdf_epub:
-    executor: python
-    steps:
-      - checkout
-      - run:
-          name: Install sphinx
-          command: |
-            pip install sphinx sphinx-rtd-theme restructuredtext_lint pygments
-      - run:
-          name: submodule init
-          command: |
-            git submodule update --init --recursive
-      - run:
-          name: Install singularity deps
-          command: |
-            apt-get update -y && \
-            apt-get install -f -y build-essential libssl-dev uuid-dev squashfs-tools libseccomp-dev cryptsetup-bin libgpgme-dev
-      - run:
-          name: Install Go 1.14.11
-          command: |
-            wget https://dl.google.com/go/go1.14.11.linux-amd64.tar.gz
-            rm -rf /usr/local/go
-            tar -C /usr/local -xzf go1.14.11.linux-amd64.tar.gz
-            ln -s /usr/local/go/bin/go /usr/local/bin/go
-      - run:
-          name: Install TeXlive
-          command: |
-            apt-get install -f -y texlive-latex-extra latexmk
-      - run:
-          name: make pdf
-          command: |
-            make latexpdf
-      - store_artifacts:
-          path: _build/latex
-          destination: pdf
-      - run:
-          name: make epub
-          command: |
-            make epub
-      - store_artifacts:
-          path: _build/epub
-          destination: epub
-
 workflows:
   version: 2
   build_and_test:
@@ -115,8 +72,5 @@ workflows:
       - lint_markdown
       - check_rst
       - make_html:
-          requires:
-            - check_rst
-      - make_pdf_epub:
           requires:
             - check_rst

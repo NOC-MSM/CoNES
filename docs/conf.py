@@ -47,11 +47,6 @@ extensions = [
     "sphinx_autosummary_accessors",
 ]
 
-# GitHub links
-extlinks = {
-    "pr": ("https://github.com/NOC-MSM/CoNES/pull/%s", "PR#"),
-}
-
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates", sphinx_autosummary_accessors.templates_path]
 
@@ -80,23 +75,7 @@ html_theme = "sphinx_rtd_theme"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
-
-html_theme_options = {
-    'sticky_navigation': True,
-    'includehidden': True,
-    'navigation_depth': 5,
-    'prev_next_buttons_location': 'bottom',
-    'style_external_links': True,
-}
-
-html_context = {
-    'display_github': True,
-    'github_user': 'NOC-MSM',
-    'github_repo': 'CoNES',
-    'github_version': 'main',
-    'conf_py_path': '/',
-}
+html_static_path = ["docs/_static"]
 
 # Logos
 html_logo = "_static/CoNES_logo.png"
