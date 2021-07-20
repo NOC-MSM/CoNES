@@ -11,53 +11,57 @@ Quick Start
 .. _NEMO: www.nemo-ocean.eu
 
 This guide is intended for running a NEMO Singularity Image File (SIF) 
-on a HPC cluster or Linux machine that has Singularty installed. It should also 
+on a HPC cluster or Linux machine that has Singularty installed. A summary of
+how to *build* a NEMO SIF is given in the next :ref:`section <building>`. It should also 
 be possible to build and run a NEMO SIF on MacOS/Windows machines. For further 
 information on installing and using Singularity on different architecture 
 please refer to the `Singularity Guide`_.
 
-An outline how to setup, download and run a NEMO SIF on the
-`ARCHER2 HPC Service`_ follows. This example uses the `NEMO AMM7 
-configuration <https://github.com/NOC-MSM/HPC_Scaling_AMM7>`_. 
-
-
-
-as the example on ARCHER2
-The config files for this make use of HPC_Scaling_AMM7
-
-The simplest way to get up and running is to download a pre-build NEMO SIF.
-You will need a Linux system that is has an up-to-date Singularity installation
-
-
-Options for
-using {Singularity} on Mac and Windows machines, along with alternate
-Linux installation optionrs are discussed in the `installation section of the
-admin guide
-<https://sylabs.io/guides/e\{adminversion\}/admin-guide/installation.html>`__.
-
-
-The following example is for ARCHER2
+By way of example, an outline of how to setup, download and run a NEMO SIF using the
+`ARCHER2 HPC Service`_ follows. This example uses the pre-built NEMO SIFs released under
+`CoNES <https://github.com/NOC-MSM/CoNES/releases/latest>`_ and the `NEMO AMM7 
+configuration setup <https://github.com/NOC-MSM/HPC_Scaling_AMM7>`_. 
 
 --------------------------
 Setting up the environment
 --------------------------
 
-.. code-block:: none
+Log in to ARCHER2 using the ``login.archer2.ac.uk`` address:
+
+.. code-block:: sh
+
+   ssh [userID]@login.archer2.ac.uk
+
+.. hint::
+
+   More information on connecting to ARCHER2 is available at:
+   `Connecting to ARCHER2 <https://docs.archer2.ac.uk/user-guide/connecting/>`_.
+
+Next, navigate to a suitable directory on ``/work`` to clone the configuration repository 
+by issuing the following:
+
+.. code-block:: sh
 
    git clone https://github.com/NOC-MSM/HPC_Scaling_AMM7
-   HPC_Scaling_AMM7/scripts/setup/amm7_setup -w $PWD/rundir -x $PWD/test \
+   HPC_Scaling_AMM7/scripts/setup/amm7_setup -w $PWD/singularity \
                                              -s $PWD/HPC_Scaling_AMM7 \
-                                             -m archer2 -v sing -c gnu
+                                             -S -M OMPI
+
+This will create a run directory ``$PWD/singularity`` where the configuration files, runscripts
+and nemo SIF will be installed. On ARCHER2 singularity is available by default so there is no
+need to load it into the environment. However, there are several other module files required
+to run a SIF. These are loaded at runtime via the runscripts in the installation folder.
 
 
-------------------------
-Download pre-built image
-------------------------
+-----------------------------
+Download a pre-built NEMO SIF
+-----------------------------
 
+If you are 
 You must first install development libraries to your host. Assuming Ubuntu
 (apply similar to RHEL derivatives):
 
-.. code-block:: none
+.. code-block:: sh
 
     wget -c https://github.com/NOC-MSM/CoNES/releases/download/0.0.1/NOC-MSM-CoNES.nemo.sif -o nemo.sif
 

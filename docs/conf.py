@@ -37,12 +37,12 @@ author = "James Harle"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinx_rtd_theme",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
+    "sphinx_rtd_theme",
     "numpydoc",
     "sphinx_autosummary_accessors",
 ]
@@ -90,7 +90,7 @@ html_theme_options = {
 #from sphinx.highlighting import lexers
 #from pygments_singularity import SingularityLexer
 #from pygments_json import JSONLexer
-## from replacements import *
-## lexer for Singularity definition files (added here until it is upstreamed into Pygments).
+# from replacements import *
+# lexer for Singularity definition files (added here until it is upstreamed into Pygments).
 #lexers['singularity'] = SingularityLexer(startinline=True)
 #lexers['json'] = JSONLexer(startinline=True)
