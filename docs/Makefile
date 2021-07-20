@@ -22,4 +22,3 @@ help:
 .PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)/*
-	rm -rf users/generated/*
