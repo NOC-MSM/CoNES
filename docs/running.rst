@@ -2,6 +2,10 @@
 Running a container
 ===================
 
+
+Short discussion about Hybrid vs Bind and the role of MPI in running
+
+
 Need to explain the following flags that go into the srun/mpirun command
 
 .. code-block:: none
