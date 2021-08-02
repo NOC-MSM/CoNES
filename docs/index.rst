@@ -6,7 +6,7 @@ CoNES User Guide
 Welcome to the Containerisation of NEMO Employing Singularity (CoNES) User Guide!
 
 This guide aims to give an overview of how to build and run a NEMO Singularity
-Image File (SIF). Dependencies , worked examples, and how to integrate the build
+Image File (SIF). Dependencies, worked examples, and how to integrate the build
 and distribution process with GitHub will also be covered.
 
 This is by no means a definitive guide and not the only way to achieve the
