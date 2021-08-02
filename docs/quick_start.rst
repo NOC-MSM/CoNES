@@ -40,21 +40,40 @@ Log in to ARCHER2 using the ``login.archer2.ac.uk`` address:
 Next, navigate to a suitable directory on ``/work`` to clone the configuration repository 
 by issuing the following:
 
-.. code-block:: sh
+.. code-block:: bash
 
-   git clone https://github.com/NOC-MSM/HPC_Scaling_AMM7
-   HPC_Scaling_AMM7/scripts/setup/amm7_setup -w $PWD/singularity \
-                                             -s $PWD/HPC_Scaling_AMM7 \
-                                             -S -M OMPI -m archer2
+   here=$PWD
+   RUN_DIR=$here/singularity
+   git clone git@github.com:NOC-MSM/HPC_Scaling_AMM7.git
+   ./HPC_Scaling_AMM7/scripts/setup/amm7_setup_archer2 -w $RUN_DIR \
+                                                       -r $WORK_DIR/HPC_Scaling_AMM7 \
+                                                       -m archer2 -S -O -v 4.0.4
 
-This will create a run directory ``$PWD/singularity`` where the configuration files, runscripts
+This will create a run directory ``$RUN_DIR`` where the configuration files, runscripts
 and nemo SIF will be installed. On ARCHER2 singularity is available by default so there is no
 need to load it into the environment. However, there are several other module files required
 to run a SIF. These are loaded at runtime via the runscripts in the installation folder.
-Within ``$PWD/singularity`` a directory called ``$PWD/singularity/output`` will be created. 
+Within ``$RUN_DIR`` a directory called ``$RUN_DIR/EXP00`` will be created. 
 This serves as the mount point for the SIF to read and write data. Any NEMO input files (netcdf,
 namelists etc) need to be in this directory. All output from the simulation will be written here.
 
+The above example sets up an openMPI configuration of NEMO. ARCHER2 also have the MPICH libraries 
+available which can be accessed using the following:
+
+.. code-block:: bash
+
+   here=$PWD
+   RUN_DIR=$here/singularity
+   git clone git@github.com:NOC-MSM/HPC_Scaling_AMM7.git
+   ./HPC_Scaling_AMM7/scripts/setup/amm7_setup_archer2 -w $RUN_DIR \
+                                                       -r $here/HPC_Scaling_AMM7 
+                                                       -m archer2 -S -v 4.0.4
+
+For a full set of options available in the ``amm7_setup_archer2`` issue the command:
+
+.. code-block:: bash
+
+   ./HPC_Scaling_AMM7/scripts/setup/amm7_setup_archer2 -h
 
 -----------------------------
 Download a pre-built NEMO SIF
@@ -109,7 +128,8 @@ process. To submit one of these runscript to the queue simply issue the followin
 
 .. code-block:: bash
 
-    sbatch runscript.slurm
+    cd $RUN_DIR
+    sbatch runscript_1Xg_95N.slurm # Change project code accordingly
 
 Depending on which MPI option is chosen the runscript will use ``mpirun`` or ``srun`` with the following syntax to distribute *NEMO* and *XIOS* containers accordingly.
 
