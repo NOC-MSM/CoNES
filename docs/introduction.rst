@@ -29,8 +29,8 @@ climate system over a wide range of space and time scales.
 Singularity
 -----------
 
-Singularity is a *container* that allows you to create and run
-pieces of software in a way that is portable and reproducible. 
+Singularity is a *container* that allows the creation and execution
+of software in a way that is portable and reproducible. 
 They can be built on a laptop/desktop, and then run on a HPC service, 
 local cluster, a single server, in the cloud, and most workstations. 
 A Singularity container is a single file, containing all the software 
