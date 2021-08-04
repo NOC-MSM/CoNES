@@ -53,9 +53,9 @@ This will create a run directory, ``$RUN_DIR``, where the configuration files, r
 and nemo SIF will be installed. On ARCHER2 singularity is available by default so there is no
 need to load it into the environment. However, there are several other module files required
 to run a SIF. These are loaded at runtime via the runscripts in the installation folder.
-Within ``$RUN_DIR`` a directory called `EXP00`` will be created. 
+Within ``$RUN_DIR`` a directory called ``EXP00`` will be created. 
 This serves as the mount point for the SIF to read and write data. Any NEMO input files (netcdf,
-namelists etc) need to be in this directory. All output from the simulation will be written here.
+namelists etc) need to be in this directory. All output from the simulation will be written there.
 
 The above example sets up an openMPI configuration of NEMO. ARCHER2 also has the MPICH libraries 
 available which can be accessed using the following:
