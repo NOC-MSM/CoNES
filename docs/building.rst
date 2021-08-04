@@ -39,6 +39,15 @@ GitHub Builds
 Overview
 --------
 
+If building locally is not an option then it is also possible to build and 
+release Singularity containers on `GitHub <http://www.github.com>`_. 
+`Singularity Deploy <https://github.com/singularityhub/singularity-deploy>`_
+developed by `Vanessa Sochat <https://github.com/vsoch>`_ has been modified 
+to allow users to fork the `GitHub CoNES repository <https://github.com/NOC-MSM/CoNES>`_
+and, using `GitHub Actions <https://github.com/features/actions>`_, build and 
+release a *bespoke* NEMO singularity container in much the same manner as
+described previously.
+
 ------
 Inputs
 ------
