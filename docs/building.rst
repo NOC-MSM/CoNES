@@ -4,21 +4,18 @@
 Building a NEMO Container
 =========================
 
-This guide is intended for bulding/running a NEMO Singularity Image File (SIF) 
-on a HPC cluster or Linux machine that has Singularty installed. It should also 
-be possible to build and run a NEMO SIF on MacOS/Windows machines. For further 
-information on installing and using Singularity on different architecture 
-please refer to the `Sylabs instalation guides <https://sylabs.io/guides/>`.
+In this section an overview of how a NEMO SIF is built under the CoNES project.
 
-This section provides an overview of downloading and running a NEMO SIF on the
-ARCHER2 HPC service. The methods here should be widely applicatable to other HPC
-systems.
+- Summary of the defination file used to build the SIF
+- Build on a variety of platforms
 
-In this example we will make use of a pre-build NEMO SIF and
-The simplest way to get up and running is to download a pre-build NEMO SIF.
-You will need a Linux system that is has an up-to-date Singularity installation
+- summarise building from the command line and using gihub actions as an immuatble Singularity Image File (SIF)
 
+- touch on sandbox builds allowing the user to shell/read/write access to the container
 
+- converting images and producing definiation files from existing SIFs
+
+First the definiation file used in the various builds is summarised: 
 
 Definition File
 ===============
@@ -38,6 +35,26 @@ Definition File
         input_files/setup_nemo /input_files/setup_nemo
         input_files/arch_files /input_files/arch/nemo/arch-files
 
+
+The ``%files`` section lists the externals required to build the SIF. In this case contains executes within the container at build time after the base 
+
+NEMO_in conatins:
+
+.. code-block:: sh
+
+     MY_SRC=                        # If blank no need to do anything
+     NEMO_VERSION=4.0.4             # Check that VERSION is 4.0.[2-6], 4.0_HEAD or trunk
+     XIOS_REVISION=                 # Use default value if empty
+     NEMO_COMPONENTS='OCE'
+     CPP_KEYS=
+     MPI=                           # Which MPI implementation to use
+
+
+MY_SRC conatians
+
+setup_nemo is the NEMO/XIOS build script
+
+arch_files contain compiler directives for build NEMO and XIOS
 
 .. code-block:: singularity
 
