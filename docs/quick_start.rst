@@ -14,11 +14,11 @@ This guide is intended for running a NEMO Singularity Image File (SIF)
 on a HPC cluster or Linux machine that has Singularty installed. A summary of
 how to *build* a NEMO SIF is given in the next :ref:`section <building>`. It should also 
 be possible to build and run a NEMO SIF on MacOS/Windows machines. For further 
-information on installing and using Singularity on different architecture 
+information on installing and using Singularity on different architectures 
 please refer to the `Singularity Guide`_.
 
 By way of example, an outline of how to setup, download and run a NEMO SIF using the
-`ARCHER2 HPC Service`_ follows. This example uses the pre-built NEMO SIFs released under
+`ARCHER2 HPC Service`_ follows. This make use of the pre-built NEMO SIFs released under
 `CoNES <https://github.com/NOC-MSM/CoNES/releases/latest>`_ and the `NEMO AMM7 
 configuration setup <https://github.com/NOC-MSM/HPC_Scaling_AMM7>`_. 
 
@@ -52,12 +52,13 @@ by issuing the following:
 This will create a run directory, ``$RUN_DIR``, where the configuration files, runscripts
 and nemo SIF will be installed. On ARCHER2 singularity is available by default so there is no
 need to load it into the environment. However, there are several other module files required
-to run a SIF. These are loaded at runtime via the runscripts in the installation folder.
+to run a SIF. These are automatically loaded at runtime via the runscripts in the installation folder.
 Within ``$RUN_DIR`` a directory called ``EXP00`` will be created. 
 This serves as the mount point for the SIF to read and write data. Any NEMO input files (netcdf,
-namelists etc) need to be in this directory. All output from the simulation will be written there.
+namelists etc) need to be in this directory. All output from the simulation will also be written to 
+this directory.
 
-The above example sets up an openMPI configuration of NEMO. ARCHER2 also has the MPICH libraries 
+The above example sets up an openMPI ``-O`` configuration of NEMO. ARCHER2 also has the MPICH libraries 
 available which can be accessed using the following:
 
 .. code-block:: bash
@@ -84,7 +85,7 @@ Download a pre-built NEMO SIF
 
 If you are not running on the ARCHER2 HPC service you can either clone the 
 `NEMO AMM7 configuration setup <https://github.com/NOC-MSM/HPC_Scaling_AMM7>`_
-and addapt the setup script or directly download the pre-built NEMO SIF. There 
+and adapt the setup script or directly download the pre-built NEMO SIF. There 
 are several ways in which to achive this:
 
 .. code-block:: bash
@@ -98,7 +99,7 @@ Singularity can also *pull* just knowing the URL. For example:
     singularity pull https://github.com/NOC-MSM/CoNES/releases/download/0.0.1/NOC-MSM-CoNES.nemo.sif
 
 There are also other tools under development that can achieve similar results. The *singularity-hpc* tool is 
-designed to be able to parse and handle container URIs automatically. For the NEMO SIFe, you could do:
+designed to be able to parse and handle container URIs automatically. For the NEMO SIFs, you could do:
 
 .. code-block:: bash
 
@@ -148,4 +149,4 @@ the sub-directory ``EXP00``. Standard NEMO input files must reside in this direc
 by the container. At runtime the ``EXP00`` directory is *mounted* within the container and used
 by the NEMO and XIOS executables. Any output from the simulation will also be written to this 
 directory. ``stdout`` and ``stderr`` are written to ``$RUN_DIR`` and not ``EXP00``. Note the last few 
-lines of the runscript move data from ``EXP00`` to various sub-directories under $RUN_DIR.
+lines of the runscript move data from ``EXP00`` to various sub-directories under ``$RUN_DIR``.
