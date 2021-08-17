@@ -23,7 +23,6 @@ You will need a Linux system that is has an up-to-date Singularity installation
 Definition File
 ===============
 
-T
 .. code-block:: singularity
 
     Bootstrap: library
