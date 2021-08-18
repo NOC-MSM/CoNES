@@ -4,9 +4,10 @@
 Building a NEMO Container
 =========================
 
-In this section an overview of how a NEMO SIF is built under the CoNES project.
+In this section an overview of how a NEMO SIF is built under the CoNES project is presented.
 
 - Summary of the defination file used to build the SIF
+  
 - Build on a variety of platforms
 
 - summarise building from the command line and using gihub actions as an immuatble Singularity Image File (SIF)
@@ -40,8 +41,9 @@ of how to build a NEMO/XIOS SIF describes the recipe used in the CoNES project.
         input_files/arch_files /input_files/arch/nemo/arch-files
 
 
-The ``%files`` section lists the externals required to build the SIF. The first of these is a
-simple *namelist* file ``NEMO_in``, which provides a handlful of variables customise the build:
+The ``%files`` section lists the external files on the host system required to build the SIF. 
+The first of these is a simple *namelist* file ``NEMO_in``, which provides a handlful of 
+variables that allow the user customise the build process:
 
 .. code-block:: sh
 
@@ -54,21 +56,19 @@ simple *namelist* file ``NEMO_in``, which provides a handlful of variables custo
                                     # If empty and using GH actions, both will be built 
 
 
-In addtion ``MY_SRC.tar.gz`` contains any updated source files required to build NEMO. 
-``setup_nemo`` is the NEMO/XIOS build script. Using the environment variables from ``NEMO_in``, the source code is cheeckout from the Paris Subversion repository and build within the container. ``arch_files`` contain compiler directives for building NEMO and XIOS within the chosen Linux environment.
+In addtion, there are several other input files. ``MY_SRC.tar.gz`` contains any updated source files 
+required to build NEMO. ``setup_nemo`` is the NEMO/XIOS build script. Using the environment variables 
+from ``NEMO_in``, the source code is checked out from the Paris Subversion repository and built within 
+the container using ``arch_files`` containing compiler directives for the chosen Linux environment.
+
+In the following ``%post`` section installation of the OS and NEMO/XIOS is defined:
 
 .. code-block:: singularity
 
-%post
+    %post
 
     ##
-    #
-    # Compilation from source necessary where apt-get binaries weren't compiled with necessary dependencies for XIOS and NEMO
-    #
-    ##
-
-    ##
-    # install basic stuff
+    # Install apt-get binaries, build necessary dependencies, compile NEMO/XIOS
     ##
 
     apt install -y locales #locales-all
@@ -78,66 +78,16 @@ In addtion ``MY_SRC.tar.gz`` contains any updated source files required to build
     add-apt-repository universe
     apt update
 
-    # n.b.
-    #   - libcurl4-openssl-dev also installs libcurl4 (as does curl, if not already installed)
-    #   - zlib already installed
     apt install -y python \
-                   subversion \
-                   wget \
-                   git \
-                   make \
-                   m4 \
-                   gcc-10 \
-                   gfortran-10 \
-                   g++-10 \
-                   liburi-perl \
-                   libcurl4-openssl-dev \
-                   curl \
-                   zlib1g-dev \
-                   libibverbs-dev \
-                   libpmix-dev \
-                   libslurm-dev \
-                   crudini
+                   ...
 
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10
-    update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-10 100
-    ln -s /usr/bin/cpp-10 /usr/bin/cpp
+Once the base OS and relevant binaries have been installed then necessary dependecies (not available
+via ``apt-get`` are then built (including MPI, HDF5 and netCDF):
 
-    # this decreases the size of the container
-    apt clean
+.. code-block:: singularity
 
-    ##
-    # make user `nemo` - mpiexec in hdf5 `make check` complains if run as root (although we're not running it at the moment)
-    ##
 
-    adduser --disabled-password --gecos "" nemo
-
-    ###
-    # softlink gmake to make
-    ###
-
-    ln -s /usr/bin/make /usr/bin/gmake
-
-    ##
-    # compiling openmpi
-    ##
-
-    # MPI=`crudini --get /input_files/NEMO_in DEFAULT MPI` # For some reason this yanks the whole line including comments
-
-    . /input_files/NEMO_in
-
-    if [ -z "$MPI" ] && [ "$MPI_SWAP" = "MPICH" ]
-    then
-        MPI="MPICH"
-    elif [ -z "$MPI" ] && [ "$MPI_SWAP" = "OMPI" ]
-    then
-        MPI="OMPI"
-    fi
-
-    MPI_DIR=/opt/mpi
-    mkdir -p $MPI_DIR
-    cd $MPI_DIR
-    mkdir mpi
+    ...
 
     if [ "$MPI" = "MPICH" ]
     then
@@ -155,107 +105,11 @@ In addtion ``MY_SRC.tar.gz`` contains any updated source files required to build
 
     elif [ "$MPI" = "OMPI" ]
     then
+        ...
 
-        wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.bz2
-        tar -xvjf openmpi-4.1.1.tar.bz2 -C mpi --strip-components 1
-        rm openmpi-4.1.1.tar.bz2
-        cd mpi
+Finally, NEMO/XIOS are compiled using the previously imported ``%files``:
 
-        ./configure CC=gcc CXX=g++ FC=gfortran --enable-mpi1-compatibility --prefix=/opt/mpi/install --with-verbs --with-slurm --with-pmix
-        make
-        make install
-    else
-       echo "No MPI implementation specified"
-       exit 1
-    fi
-
-    cd /opt/mpi
-    rm -r mpi # removes the 303 mb directory
-
-    ##
-    # compile HDF5 libraries
-    ##
-
-    HDF_DIR=/opt/hdf5
-    mkdir -p $HDF_DIR
-    cd $HDF_DIR
-    wget -O hdf5.tar.bz2 "https://www.hdfgroup.org/package/hdf5-1-12-0-tar-bz2/?wpdmdl=14584&refresh=60be563cf137e1623086652"
-    mkdir hdf
-    tar xjvf hdf5.tar.bz2 -C hdf --strip-components 1
-    rm hdf5.tar.bz2
-
-    H5DIR=/opt/hdf5/install
-    cd hdf
-
-    # n.b. --enable-fortran specifically not needed (https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html#build_default)
-    CC=/opt/mpi/install/bin/mpicc ./configure --prefix=${H5DIR} --enable-hl --enable-parallel --with-default-api-version=v18
-    make
-    # maybe we shouldn't bother with make check - it complains about a lot and we're not actually building on a parallel file system
-    # so some of the checks are totally irrelevant
-    # make check -i RUNPARALLEL='-oversubscribe'
-    make install
-    cd ..
-    rm -r hdf # removes the 212 mb directory
-
-    ##
-    # compile NetCDF libraries
-    ##
-
-    NETCDF_DIR=/opt/netcdf
-    mkdir -p $NETCDF_DIR
-    cd $NETCDF_DIR
-
-    # C libraries...
-    wget -O netcdf.tar.gz https://github.com/Unidata/netcdf-c/archive/v4.8.0.tar.gz
-    mkdir netcdf
-    tar xzvf netcdf.tar.gz -C netcdf --strip-components 1
-    rm netcdf.tar.gz
-
-    cd netcdf
-    NCDIR=/opt/netcdf/install
-
-    CC=/opt/mpi/install/bin/mpicc FC=/opt/mpi/install/bin/mpifort CPPFLAGS="-I${H5DIR}/include" LDFLAGS="-L${H5DIR}/lib" ./configure --disable-shared --prefix=$NCDIR
-    make
-    # make check fails; maybe we should avoid running it (only 1 response from a question on the netcdf mailing list, saying it is really finicky)
-    # make check
-    make install
-    cd ..
-    rm -r netcdf # removes the 125 mb directory
-
-    # ...and the fortran libraries
-    wget https://github.com/Unidata/netcdf-fortran/archive/v4.5.3.tar.gz
-    mkdir netcdf
-    tar xzvf v4.5.3.tar.gz -C netcdf --strip-components 1
-    rm v4.5.3.tar.gz
-    cd netcdf
-    NFDIR=/opt/netcdf/install
-
-    CC=/opt/mpi/install/bin/mpicc FC=/opt/mpi/install/bin/mpifort CPPFLAGS="-I${NCDIR}/include -I${H5DIR}/include" LDFLAGS="-L${NCDIR}/lib -L${H5DIR}/lib" LIBS="-lhdf5 -lhdf5_hl -lcurl" ./configure --prefix=$NFDIR --disable-shared
-    make
-    make install
-    cd ..
-    rm -r netcdf # removes the 18 mb directory
-
-    ##
-    # Now we can install NEMO
-    ##
-
-    ln -s /opt/mpi/install/bin/mpif90 /usr/bin/mpif90
-
-    WORK_DIR=/nemo >> $SINGULARITY_ENVIRONMENT
-    mkdir $WORK_DIR
-    cd $WORK_DIR
-    chown nemo:nemo -R $WORK_DIR
-
-    PATH=$PATH:/opt/mpi/install/bin:/opt/hdf5/install/bin
-    LD_LIBRARY_PATH=/opt/hdf5/install/lib:$LD_LIBRARY_PATH
-
-    cd $WORK_DIR
-
-    . /input_files/NEMO_in
-
-    chmod u+x /input_files/setup_nemo
-    /input_files/setup_nemo -x /nemo -w /nemo -s /nemo/AMM7_lite -m singularity -v $NEMO_VERSION -c gnu
+    /input_files/setup_nemo -x /nemo -w /nemo -m singularity -v $NEMO_VERSION -c gnu
 
     cd /nemo/nemo/cfgs/NEMO/EXP00
 
@@ -268,32 +122,10 @@ In addtion ``MY_SRC.tar.gz`` contains any updated source files required to build
     ln -s ../../SHARED/domain_def_nemo.xml domain_def_nemo.xml
     ln -s ../../SHARED/axis_def_nemo.xml axis_def_nemo.xml
 
-    cd $WORK_DIR
 
-    mkdir /opt/nemo
-    mv /nemo/nemo/cfgs/NEMO/EXP00/nemo /opt/nemo/
-
-    mkdir /opt/xios
-    mv /nemo/nemo/cfgs/NEMO/EXP00/xios_server.exe /opt/xios/xios
-
-    # make everything we've built be owned by `nemo`
-    chown -Rv nemo:nemo /opt
-
-    # minimal possible permissions: directories executable; binaries read + executable (need to be readable to that library headers can be read!); everything else only readable for g+o
-    chmod -Rv 644 /opt
-    find /opt -type d -print0 | xargs -0 chmod -v 511
-    find /opt -type f -exec file -i {} + | grep ":[^:]*binary[^:]*$" |  sed 's/^\(.*\):[^:]*$/\1/' | xargs chmod -v 555
-
-
-    rm -rf /var/lib/apt/lists/* /var/lib/dpkg/info/*
-    #echo $LD_LIBRARY_PATH
-    #ls /opt/hdf5/install/lib
-    #echo "export LD_LIBRARY_PATH=/opt/hdf5/install/lib:\"${LD_LIBRARY_PATH}\"" >> $SINGULARITY_ENVIRONMENT
-    #echo $SINGULARITY_ENVIRONMENT
-
+ 
 %environment
 
-    # this is needed - nemo is built dynamically (and openmpi, the other library needed, is dealt with in the wrapper script automagically)
     export LD_LIBRARY_PATH=/opt/hdf5/install/lib:$LD_LIBRARY_PATH
 
 %runscript
