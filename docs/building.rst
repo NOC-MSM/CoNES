@@ -38,7 +38,7 @@ Definition File
 
 The ``%files`` section lists the externals required to build the SIF. In this case contains executes within the container at build time after the base 
 
-NEMO_in conatins:
+NEMO_in, a namelist for the NEMO build, conatins:
 
 .. code-block:: sh
 
@@ -50,11 +50,7 @@ NEMO_in conatins:
      MPI=                           # Which MPI implementation to use
 
 
-MY_SRC conatians
-
-setup_nemo is the NEMO/XIOS build script
-
-arch_files contain compiler directives for build NEMO and XIOS
+``MY_SRC.tar.gz`` contains an updated source files required to build NEMO.  ``setup_nemo`` is the NEMO/XIOS build script. ``arch_files`` contain compiler directives for building NEMO and XIOS within a Linux environment.
 
 .. code-block:: singularity
 
