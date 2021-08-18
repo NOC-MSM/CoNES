@@ -20,14 +20,18 @@ First the definiation file used in the various builds is summarised:
 Definition File
 ===============
 
+The definition file provides a recipe to build the reporoducible SIF. It provides information
+about the about the base OS, software to compile and environment setup. The following example 
+of how to build a NEMO/XIOS SIF describes the recipe used in the CoNES project.
+
 .. code-block:: singularity
 
     Bootstrap: library
     From: ubuntu:20.04
 
-    ############################
-    # NEMO Singularity Container
-    ############################      
+    ##############################
+    # NEMO Singularity Container #
+    ##############################    
  
     %files
         input_files/NEMO_in /input_files/NEMO_in
@@ -36,21 +40,22 @@ Definition File
         input_files/arch_files /input_files/arch/nemo/arch-files
 
 
-The ``%files`` section lists the externals required to build the SIF. In this case contains executes within the container at build time after the base 
-
-NEMO_in, a namelist for the NEMO build, conatins:
+The ``%files`` section lists the externals required to build the SIF. The first of these is a
+simple *namelist* file ``NEMO_in``, which provides a handlful of variables customise the build:
 
 .. code-block:: sh
 
      MY_SRC=                        # If blank no need to do anything
      NEMO_VERSION=4.0.4             # Check that VERSION is 4.0.[2-6], 4.0_HEAD or trunk
      XIOS_REVISION=                 # Use default value if empty
-     NEMO_COMPONENTS='OCE'
-     CPP_KEYS=
-     MPI=                           # Which MPI implementation to use
+     NEMO_COMPONENTS='OCE'          # Which NEMO components to build OCE/ICE/TOP etc
+     CPP_KEYS=                      # Any additional compiler keys to include? 
+     MPI=                           # Which MPI implementation to use MPICH | OMPI
+                                    # If empty and using GH actions, both will be built 
 
 
-``MY_SRC.tar.gz`` contains an updated source files required to build NEMO.  ``setup_nemo`` is the NEMO/XIOS build script. ``arch_files`` contain compiler directives for building NEMO and XIOS within a Linux environment.
+In addtion ``MY_SRC.tar.gz`` contains any updated source files required to build NEMO. 
+``setup_nemo`` is the NEMO/XIOS build script. Using the environment variables from ``NEMO_in``, the source code is cheeckout from the Paris Subversion repository and build within the container. ``arch_files`` contain compiler directives for building NEMO and XIOS within the chosen Linux environment.
 
 .. code-block:: singularity
 
