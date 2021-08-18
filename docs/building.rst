@@ -80,6 +80,24 @@ In the following ``%post`` section installation of the OS and NEMO/XIOS is defin
 
         apt install -y python \
     ...
+        if [ "$MPI" = "MPICH" ]
+        then
+
+             apt install -y libfabric-dev
+
+             wget http://www.mpich.org/static/downloads/3.4.2/mpich-3.4.2.tar.gz
+             tar -xvzf mpich-3.4.2.tar.gz -C mpi --strip-components 1
+             rm mpich-3.4.2.tar.gz
+             cd mpi
+
+             ./configure CC=gcc CXX=g++ FC=gfortran --prefix=/opt/mpi/install FFLAGS=-fallow-argument-mismatch
+             make
+             make install
+
+        elif [ "$MPI" = "OMPI" ]
+        then
+    ...
+        /input_files/setup_nemo -x /nemo -w /nemo -m singularity -v $NEMO_VERSION -c gnu
 
 Once the base OS and relevant binaries have been installed then necessary dependecies (not available
 via ``apt-get``; MPI, HDF5 and netCDF) are built, e.g.:
