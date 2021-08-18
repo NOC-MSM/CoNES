@@ -63,7 +63,7 @@ autodoc_typehints = "none"
 numpydoc_show_class_members = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+# pygments_style = 'sphinx'
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -88,10 +88,10 @@ html_theme_options = {
 # -- Custom lexer ---------------------------------------------------------
 
 #sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
-from sphinx.highlighting import lexers
-from pygments_singularity import SingularityLexer
+#from sphinx.highlighting import lexers
+#from pygments_singularity import SingularityLexer
 #from pygments_json import JSONLexer
 # from replacements import *
 # lexer for Singularity definition files (added here until it is upstreamed into Pygments).
-lexers['singularity'] = SingularityLexer(startinline=True)
+#lexers['singularity'] = SingularityLexer(startinline=True)
 #lexers['json'] = JSONLexer(startinline=True)
