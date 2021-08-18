@@ -63,7 +63,7 @@ autodoc_typehints = "none"
 numpydoc_show_class_members = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-# pygments_style = 'sphinx'
+pygments_style = 'default'
 
 # -- Options for HTML output -------------------------------------------------
 
