@@ -61,7 +61,10 @@ In addtion, there are several other input files: ``MY_SRC.tar.gz`` contains any 
 required to build NEMO; ``setup_nemo`` is the NEMO/XIOS build script, which checks out the source 
 code and builds NEMO/XIOS using the ``arch_files`` compiler directives for the container environment.
 
-In the following ``%post`` section installation of the OS and NEMO/XIOS is defined:
+In the ``%post`` section, the base OS is defined along with any mandatory binaries. Any relevant
+dependencies not available via ``apt-get`` (MPI, HDF5 and netCDF) are built from source. Finally, NEMO 
+and XIOS are compiled using the previously imported setup script from ``%files``. The following is 
+truncated for brevity:
 
 .. code-block:: singularity
 
@@ -99,39 +102,7 @@ In the following ``%post`` section installation of the OS and NEMO/XIOS is defin
     ...
         /input_files/setup_nemo -x /nemo -w /nemo -m singularity -v $NEMO_VERSION -c gnu
 
-Once the base OS and relevant binaries have been installed then necessary dependecies (not available
-via ``apt-get``; MPI, HDF5 and netCDF) are built, e.g.:
-
-.. code-block:: singularity
-
-    ...
-
-        if [ "$MPI" = "MPICH" ]
-        then
-
-             apt install -y libfabric-dev
-
-             wget http://www.mpich.org/static/downloads/3.4.2/mpich-3.4.2.tar.gz
-             tar -xvzf mpich-3.4.2.tar.gz -C mpi --strip-components 1
-             rm mpich-3.4.2.tar.gz
-             cd mpi
-
-             ./configure CC=gcc CXX=g++ FC=gfortran --prefix=/opt/mpi/install FFLAGS=-fallow-argument-mismatch
-             make
-             make install
-
-        elif [ "$MPI" = "OMPI" ]
-        then
-    ...
-
-Finally, NEMO/XIOS are compiled using the previously imported setup script from ``%files``:
-
-.. code-block:: singularity
- 
-    ...
-        /input_files/setup_nemo -x /nemo -w /nemo -m singularity -v $NEMO_VERSION -c gnu
-
-Next the ``%environment`` section defines the HDF libraries required by the container at runtime.
+Next the ``%environment`` section defines the path to the HDF libraries required by the container at runtime.
 
 .. code-block:: singularity
 
