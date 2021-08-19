@@ -54,14 +54,14 @@ variables that allow the user to customise the build process:
     NEMO_COMPONENTS='OCE'          # Which NEMO components to build OCE/ICE/TOP etc
     CPP_KEYS=                      # Any additional compiler keys to include? 
     MPI=                           # Which MPI implementation to use MPICH | OMPI
-                                    # If empty and using GH actions, both will be built 
+                                   # If empty and using GH actions, both will be built 
 
 
 In addtion, there are several other input files: ``MY_SRC.tar.gz`` contains any updated source files 
 required to build NEMO; ``setup_nemo`` is the NEMO/XIOS build script, which checks out the source 
 code and builds NEMO/XIOS using the ``arch_files`` compiler directives for the container environment.
 
-In the ``%post`` section, the base OS is defined along with any mandatory binaries. Any relevant
+In the ``%post`` section, the base OS is defined along with mandatory binaries. Any relevant
 dependencies not available via ``apt-get`` (MPI, HDF5 and netCDF) are built from source. Finally, NEMO 
 and XIOS are compiled using the previously imported setup script from ``%files``. The following is 
 truncated for brevity:
@@ -145,20 +145,30 @@ have been built, there are checks to see which is required.
         fi
 
 
-Build Environment
-=================
+Building a NEMO SIF
+===================
 
+Using the NEMO definition file (`Singularity.nemo <SIF https://github.com/NOC-MSM/CoNES/blob/main/Singularity.nemo>`_) 
+a SIF can be built issuing the following:
+
+.. code-block:: sh
+
+     sudo singularity build nemo.sif Singularity.nemo
+
+The command requires ``sudo`` just as installing software on your local machine requires root privileges.
+If this is not an option a the SIF can either be built as *fakeroot* on the host system, or via a GitHub
+repository.
 
 Fake Root
 =========
 
+To build a SIF root privileges are required. If the user does not have root access the *fakeroot* feature can
+be used. An unprivileged user can build or run a container as a *fake root* user. This feature is granted by
+the system admin of the host system. See sylabs guide on 
+`fakeroot <https://sylabs.io/guides/3.8/user-guide/fakeroot.html#fakeroot>_` access for more details.
 
 GitHub Builds
 =============
-
---------
-Overview
---------
 
 If building locally is not an option then it is also possible to build and 
 release Singularity containers on `GitHub <http://www.github.com>`_. 
@@ -169,22 +179,40 @@ and, using `GitHub Actions <https://github.com/features/actions>`_, build and
 release a *bespoke* NEMO singularity container in much the same manner as
 described previously.
 
-------
-Inputs
-------
+The repository has been set up such that:
+
+- the container is updated/developed via a branch
+
+- the container builds will be tested on a pull request
+
+- a release will be triggered on merge into main
+  
+
+  
+Once the CoNES repository has been forked
 
 
---------------
-How to develop
---------------
+The workflow can be modified by altering:
 
------------
-How to Pull
------------
+- .github/workflows/builder.yml for the container release
 
---------------
-GitHub Actions
---------------
+- .github/workflows/test.yml for the testing of builds
+
+
+
+To download the released NEMO SIF:
+
+.. code-block:: bash
+
+    wget -c https://github.com/$FORKED_CoNES_ID/releases/download/$VERSION/$FORKED_CoNES_ID.nemo.sif -o nemo.sif
+
+Singularity can also *pull* just knowing the URL. For example:
+
+.. code-block:: bash
+
+    singularity pull https://github.com/$FORKED_CoNES_ID/CoNES/releases/download/$VERSION/$FORKED_CoNES_ID.nemo.sif
+
+
 
 
 Further Features
