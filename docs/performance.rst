@@ -4,23 +4,21 @@
 Performance
 ===========
 
-Intro to running on ARCHER2 with refs
+In order to assess the performance oIntro to running on ARCHER2 with refs
 
 -------------
 Scaling Tests
 -------------
 
-Summary here
+The tests under
+
+
+
+To be tested: > O0 and *bind* mode
 
 ----------
 Bare-metal
 ----------
-
-Graphs + optimisations
-
---------
-NEMO SIF
---------
 
 Graphs + optimisations
 
@@ -30,7 +28,13 @@ Graphs + optimisations
 .. image:: _static/AMM7_scale2.png
    :width: 600
 
-.. image:: _static/AMM7_scale3.png
+--------
+NEMO SIF
+--------
+
+Graphs + optimisations
+
+.. image:: _static/AMM7_scale5.png
    :width: 600
 
 
