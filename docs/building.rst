@@ -5,18 +5,10 @@ Building a NEMO Container
 =========================
 
 In this section an overview of how a NEMO SIF is built under the CoNES project is presented.
-
-- Summary of the defination file used to build the SIF
-  
-- Build on a variety of platforms
-
-- summarise building from the command line and using gihub actions as an immuatble Singularity Image File (SIF)
-
-- touch on sandbox builds allowing the user to shell/read/write access to the container
-
-- converting images and producing definiation files from existing SIFs
-
-First the definiation file used in the various builds is summarised: 
+Using a definition file a SIF can be built on the command line or using GitHub actions. We'll
+also touch on sandbox builds, allowing the user to shell/read/write access to the container,
+converting image files and producing definition files from existing SIFs. First the definiation 
+file used in the various builds is summarised: 
 
 Definition File
 ===============
@@ -145,10 +137,10 @@ have been built, there are checks to see which is required.
         fi
 
 
-Building a NEMO SIF
-===================
+The Build
+=========
 
-Using the NEMO definition file (`Singularity.nemo <SIF https://github.com/NOC-MSM/CoNES/blob/main/Singularity.nemo>`_) 
+Using the NEMO definition file, `Singularity.nemo <SIF https://github.com/NOC-MSM/CoNES/blob/main/Singularity.nemo>`_,
 a SIF can be built issuing the following:
 
 .. code-block:: sh
@@ -165,7 +157,7 @@ Fake Root
 To build a SIF root privileges are required. If the user does not have root access the *fakeroot* feature can
 be used. An unprivileged user can build or run a container as a *fake root* user. This feature is granted by
 the system admin of the host system. See sylabs guide on 
-`fakeroot <https://sylabs.io/guides/3.8/user-guide/fakeroot.html#fakeroot>_` access for more details.
+`fakeroot <https://sylabs.io/guides/3.8/user-guide/fakeroot.html#fakeroot>`_ access for more details.
 
 GitHub Builds
 =============
