@@ -19,8 +19,8 @@ please refer to the `Singularity Guide`_.
 
 By way of example, an outline of how to setup, download and run a NEMO SIF using the
 `ARCHER2 HPC Service`_ follows. This make use of the pre-built NEMO SIFs released under
-`CoNES <https://github.com/NOC-MSM/CoNES/releases/latest>`_ and the `NEMO AMM7 
-configuration setup <https://github.com/NOC-MSM/HPC_Scaling_AMM7>`_. 
+`CoNES <https://github.com/NOC-MSM/CoNES/releases/latest>`_. For this example the `NEMO AMM7 
+configuration <https://github.com/NOC-MSM/HPC_Scaling_AMM7>`_ is used. 
 
 --------------------------
 Setting up the environment
@@ -37,7 +37,7 @@ Log in to ARCHER2 using the ``login.archer2.ac.uk`` address:
    More information on connecting to ARCHER2 is available at:
    `Connecting to ARCHER2 <https://docs.archer2.ac.uk/user-guide/connecting/>`_.
 
-Next, navigate to a suitable directory on ``/work`` to clone the configuration repository 
+Next, navigate to a suitable directory on ``/work`` to clone the AMM7 configuration repository 
 by issuing the following:
 
 .. code-block:: sh
@@ -117,7 +117,7 @@ or even write the container URI into a registry entry:
     maintainer: "@jdha"
     url: https://github.com/NOC-MSM/CoNES
 
-.. hint::
+.. note::
 
    More information on these last two methods can be found at:
    `Singularity HPC <https://github.com/singularityhub/singularity-hpc>`_.
@@ -129,14 +129,14 @@ Submitting a Job
 The NEMO SIF contains information about the executables avalailable, so the user
 can choose to either run NEMO or XIOS within the container. In the AMM7 example,
 several runscripts are copied to the installation directory as part of the setup
-process. To submit one of these runscripts to the queue simply issue the following:
+process. To submit one of these runscripts to the queue, simply issue the following:
 
 .. code-block:: bash
 
     cd $RUN_DIR
     sbatch runscript_1Xg_95N.slurm # Change project code accordingly
 
-Depending on which MPI option is chosen the runscript will use either ``mpirun`` or ``srun`` 
+Depending on which MPI option is chosen, the runscript will use either ``mpirun`` or ``srun`` 
 to distribute *NEMO*/ *XIOS* containers accordingly.
 
 
@@ -144,7 +144,7 @@ to distribute *NEMO*/ *XIOS* containers accordingly.
 Output Data
 -----------
 
-The sbatch command is issued from the ``$RUN_DIR``. However, the inputs and outputs are handled in
+The ``sbatch`` command is issued from the ``$RUN_DIR``. However, the inputs and outputs are handled in
 the sub-directory ``EXP00``. Standard NEMO input files must reside in this directory to be accessed
 by the container. At runtime the ``EXP00`` directory is *mounted* within the container and used
 by the NEMO and XIOS executables. Any output from the simulation will also be written to this 
