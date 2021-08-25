@@ -4,18 +4,20 @@
 Building a NEMO Container
 =========================
 
-In this section an overview of how a NEMO SIF is built under the CoNES project is presented.
-Using a definition file a SIF can be built on the command line or using GitHub actions. We'll
-also touch on sandbox builds, allowing the user to shell/read/write access to the container,
-converting image files and producing definition files from existing SIFs. First the definiation 
-file used in the various builds is summarised: 
+.. _CoNES: https://github.com/NOC-MSM/CoNES/releases/latest
+
+In this section an overview of how a NEMO SIF is built under the `CoNES`_ project is presented.
+Using a definition file, a SIF can be built on the command line or using GitHub actions. 
+Sandbox builds, allowing the user to shell/read/write access to the container,
+converting image files and producing definition files from existing SIFs will also be touched on.
+First the definiation file used in the various builds is summarised: 
 
 Definition File
 ===============
 
-The definition file provides a recipe to build the reporoducible SIF. It contains information
-about the about the base OS, software to compile and environment setup. The following stripped
-down example of how to build a NEMO/XIOS SIF describes the recipe used in the CoNES project. 
+The Singularity definition file provides a recipe to build the reporoducible SIF. It contains information
+about the base OS, software to compile and environment setup. The following stripped
+down example of how to build a NEMO/XIOS SIF describes the process used in the `CoNES`_ project. 
 The full definition file can be found `here <https://github.com/NOC-MSM/CoNES/blob/main/Singularity.nemo>`_.
 
 .. code-block:: singularity
