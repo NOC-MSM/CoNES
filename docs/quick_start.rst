@@ -9,6 +9,7 @@ Quick Start
 .. _Singularity: sylabs.io
 .. _`Singularity Guide`: https://sylabs.io/guides/
 .. _NEMO: www.nemo-ocean.eu
+.. _CoNES: https://github.com/NOC-MSM/CoNES/releases/latest
 
 This guide is intended for running a NEMO Singularity Image File (SIF) 
 on a HPC cluster or Linux machine that has Singularty installed. A summary of
@@ -19,7 +20,7 @@ please refer to the `Singularity Guide`_.
 
 By way of example, an outline of how to setup, download and run a NEMO SIF using the
 `ARCHER2 HPC Service`_ follows. This make use of the pre-built NEMO SIFs released under
-`CoNES <https://github.com/NOC-MSM/CoNES/releases/latest>`_. For this example the `NEMO AMM7 
+`CoNES`_. For this example the `NEMO AMM7 
 configuration <https://github.com/NOC-MSM/HPC_Scaling_AMM7>`_ is used. 
 
 --------------------------
