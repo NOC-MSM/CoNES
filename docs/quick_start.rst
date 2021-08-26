@@ -89,9 +89,17 @@ If you are not running on the ARCHER2 HPC service you can either clone the
 and adapt the setup script or directly download the pre-built NEMO SIF. There 
 are several ways in which to achive this:
 
+For the openMPI build
+
 .. code-block:: bash
 
-    wget -c https://github.com/NOC-MSM/CoNES/releases/download/0.0.1/NOC-MSM-CoNES.nemo.sif -o nemo.sif
+    wget -c https://github.com/NOC-MSM/CoNES/releases/download/0.0.1/NOC-MSM-CoNES.nemo-ompi.sif -o nemo.sif
+
+For the MPICH build
+
+.. code-block:: bash
+
+    wget -c https://github.com/NOC-MSM/CoNES/releases/download/0.0.1/NOC-MSM-CoNES.nemo-mpich.sif -o nemo.sif
 
 Singularity can also *pull* just knowing the URL. For example:
 
