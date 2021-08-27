@@ -176,6 +176,11 @@ and, using `GitHub Actions <https://github.com/features/actions>`_, build and
 release a *bespoke* NEMO singularity container in much the same manner as
 described previously.
 
+
+.. role:: bash(code)
+   :language: bash
+   :class: highlight
+
 The `CoNES`_ repository has been set up such that:
 
 * the container is updated/developed via a branch
@@ -192,7 +197,7 @@ This workflow can easily be modified by altering:
 
 An individual NEMO SIF build can be created using the following steps: 
 
-#. Fork the `CoNES`_ repository into :code:`$FORKED_CoNES_ID`
+#. Fork the `CoNES`_ repository into :bash:`$FORKED_CoNES_ID`
 #. Create a new branch in :code:`$FORKED_CoNES_ID`
 #. Edit the :code:`VERSION` file to something approprate (e.g. 0.0.1)
 #. Edit the `NEMO_in` namelist for NEMO version number, MPI choice etc. (see `above <nemo_in>`_ for more information)
