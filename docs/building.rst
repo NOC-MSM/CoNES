@@ -186,14 +186,14 @@ The `CoNES`_ repository has been set up such that:
   
 This workflow can easily be modified by altering:
   
-* `.github/workflows/builder.yml` for the container release
+* :code:`.github/workflows/builder.yml` for the container release
 
-* `.github/workflows/test.yml` for the testing of builds
+* :code:`.github/workflows/test.yml` for the testing of builds
 
 An individual NEMO SIF build can be created using the following steps: 
 
-#. Fork the `CoNES`_ repository into `$FORKED_CoNES_ID`
-#. Create a new branch in `$FORKED_CoNES_ID`
+#. Fork the `CoNES`_ repository into :code:`$FORKED_CoNES_ID`
+#. Create a new branch in :code:`$FORKED_CoNES_ID`
 #. Edit the :code:`VERSION` file to something approprate (e.g. 0.0.1)
 #. Edit the `NEMO_in` namelist for NEMO version number, MPI choice etc. (see `above <nemo_in>`_ for more information)
 #. Create a *Pull Request* from that branch to main (at this point a test build will be triggered (this can take ~45 minutes per MPI build requested)
