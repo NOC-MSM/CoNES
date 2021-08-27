@@ -156,7 +156,7 @@ The Build
 Using the NEMO definition file, `Singularity.nemo <SIF https://github.com/NOC-MSM/CoNES/blob/main/Singularity.nemo>`_,
 a SIF can be built issuing the following:
 
-.. code-block:: sh
+.. code-block:: bash
 
      sudo singularity build nemo.sif Singularity.nemo
 
@@ -195,9 +195,9 @@ The `CoNES`_ repository has been set up such that:
   
 This workflow can easily be modified by altering:
   
-* :code:`.github/workflows/builder.yml` for the container release
+* :file:`.github/workflows/builder.yml` for the container release
 
-* :code:`.github/workflows/test.yml` for the testing of builds
+* :file:`.github/workflows/test.yml` for the testing of builds
 
 An individual NEMO SIF build can be created using the following steps: 
 
