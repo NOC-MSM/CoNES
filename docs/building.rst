@@ -40,6 +40,8 @@ The ``%files`` section lists the external files on the host system required to b
 The first of these is a simple *namelist* file ``NEMO_in``, which provides a handlful of 
 variables that allow the user to customise the build process:
 
+.. _nemo_in:
+
 .. code-block:: sh
 
     MY_SRC=                        # If blank no need to do anything
@@ -49,6 +51,7 @@ variables that allow the user to customise the build process:
     CPP_KEYS=                      # Any additional compiler keys to include? 
     MPI=                           # Which MPI implementation to use MPICH | OMPI
                                    # If empty and using GH actions, both will be built 
+                                   # If empty and building on the commandline, the build terminate
 
 
 In addtion, there are several other input files: ``MY_SRC.tar.gz`` contains any updated source files 
@@ -150,15 +153,15 @@ a SIF can be built issuing the following:
      sudo singularity build nemo.sif Singularity.nemo
 
 The command requires ``sudo`` just as installing software on your local machine requires root privileges.
-If this is not an option a the SIF can either be built as *fakeroot* on the host system, or via a GitHub
+If this is not an option the SIF can either be built as *fakeroot* on the host system, or via a GitHub
 repository.
 
 Fake Root
 =========
 
-To build a SIF root privileges are required. If the user does not have root access the *fakeroot* feature can
+To build a SIF, root privilege is required. If the user does not have root access the *fakeroot* feature can
 be used. An unprivileged user can build or run a container as a *fake root* user. This feature is granted by
-the system admin of the host system. See sylabs guide on 
+the system admin of the host system. See Sylabs guide on 
 `fakeroot <https://sylabs.io/guides/3.8/user-guide/fakeroot.html#fakeroot>`_ access for more details.
 
 GitHub Builds
@@ -173,40 +176,48 @@ and, using `GitHub Actions <https://github.com/features/actions>`_, build and
 release a *bespoke* NEMO singularity container in much the same manner as
 described previously.
 
-The repository has been set up such that:
+The `CoNES`_ repository has been set up such that:
 
 - the container is updated/developed via a branch
 
-- the container builds will be tested on a pull request
+- the container build will be tested on a pull request
 
 - a release will be triggered on merge into main
   
-
+This workflow can easily be modified by altering:
   
-Once the CoNES repository has been forked
+- `.github/workflows/builder.yml` for the container release
 
+- `.github/workflows/test.yml` for the testing of builds
 
-The workflow can be modified by altering:
+An individual NEMO SIF build can be created using the following steps: 
 
-- .github/workflows/builder.yml for the container release
+# Fork the `CoNES`_ repository into `$FORKED_CoNES_ID`
+# Create a new branch in `$FORKED_CoNES_ID`
+# Edit the `VERSION` file to something approprate (e.g. 0.0.1)
+# Edit the `NEMO_in` namelist for NEMO version number, MPI choice etc. (see `above <nemo_in>`_ for more information)
+# Create a *Pull Request* from that branch to main (at this point a test build will be triggered (this can take ~45 minutes per MPI build requested)
+# If successful the *merge* will be available. Click merge and a NEMO SIF will be built and released under the *version* specified. (again this can take ~45 minutes per MPI build requested)
 
-- .github/workflows/test.yml for the testing of builds
+.. note::
+   
+    If the tag in the `VERSION` file is not incremented then a new release is not built
 
-
-
-To download the released NEMO SIF:
+As previously outlined in the Quick Start guide, to download the released NEMO SIF either use:
 
 .. code-block:: bash
 
     wget -c https://github.com/$FORKED_CoNES_ID/releases/download/$VERSION/$FORKED_CoNES_ID.nemo.sif -o nemo.sif
 
-Singularity can also *pull* just knowing the URL. For example:
+or Singularity can also *pull* just knowing the URL. For example:
 
 .. code-block:: bash
 
     singularity pull https://github.com/$FORKED_CoNES_ID/CoNES/releases/download/$VERSION/$FORKED_CoNES_ID.nemo.sif
 
-
+.. hint::
+  
+    You can also build the download of the new NEMO SIF into a setup script such as the one used in the `Quick Start Guide <quick_start>`_.
 
 
 Further Features
