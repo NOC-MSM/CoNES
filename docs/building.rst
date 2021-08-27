@@ -1,5 +1,13 @@
 .. _building:
 
+.. role:: bash(code)
+   :language: bash
+   :class: highlight
+
+.. role:: singularity(code)
+   :language: singularity
+   :class: highlight
+
 =========================
 Building a NEMO Container
 =========================
@@ -58,9 +66,9 @@ In addtion, there are several other input files: ``MY_SRC.tar.gz`` contains any 
 required to build NEMO; ``setup_nemo`` is the NEMO/XIOS build script, which checks out the source 
 code and builds NEMO/XIOS using the ``arch_files`` compiler directives for the container environment.
 
-In the ``%post`` section, the base OS is defined along with mandatory binaries. Any relevant
-dependencies not available via ``apt-get`` (MPI, HDF5 and netCDF) are built from source. Finally, NEMO 
-and XIOS are compiled using the previously imported setup script from ``%files``. The following is 
+In the :singularity:`%post` section, the base OS is defined along with mandatory binaries. Any relevant
+dependencies not available via :bash:``apt-get`` (MPI, HDF5 and netCDF) are built from source. Finally, NEMO 
+and XIOS are compiled using the previously imported setup script from :singularity:``%files``. The following is 
 truncated for brevity:
 
 .. code-block:: singularity
@@ -176,10 +184,6 @@ and, using `GitHub Actions <https://github.com/features/actions>`_, build and
 release a *bespoke* NEMO singularity container in much the same manner as
 described previously.
 
-
-.. role:: bash(code)
-   :language: bash
-   :class: highlight
 
 The `CoNES`_ repository has been set up such that:
 
