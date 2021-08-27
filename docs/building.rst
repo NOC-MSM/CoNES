@@ -178,30 +178,32 @@ described previously.
 
 The `CoNES`_ repository has been set up such that:
 
-- the container is updated/developed via a branch
+* the container is updated/developed via a branch
 
-- the container build will be tested on a pull request
+* the container build will be tested on a pull request
 
-- a release will be triggered on merge into main
+* a release will be triggered on merge into main
   
 This workflow can easily be modified by altering:
   
-- `.github/workflows/builder.yml` for the container release
+* `.github/workflows/builder.yml` for the container release
 
-- `.github/workflows/test.yml` for the testing of builds
+* `.github/workflows/test.yml` for the testing of builds
 
 An individual NEMO SIF build can be created using the following steps: 
 
-# Fork the `CoNES`_ repository into `$FORKED_CoNES_ID`
-# Create a new branch in `$FORKED_CoNES_ID`
-# Edit the `VERSION` file to something approprate (e.g. 0.0.1)
-# Edit the `NEMO_in` namelist for NEMO version number, MPI choice etc. (see `above <nemo_in>`_ for more information)
-# Create a *Pull Request* from that branch to main (at this point a test build will be triggered (this can take ~45 minutes per MPI build requested)
-# If successful the *merge* will be available. Click merge and a NEMO SIF will be built and released under the *version* specified. (again this can take ~45 minutes per MPI build requested)
+#. Fork the `CoNES`_ repository into `$FORKED_CoNES_ID`
+#. Create a new branch in `$FORKED_CoNES_ID`
+#. Edit the `VERSION` file to something approprate (e.g. 0.0.1)
+#. Edit the `NEMO_in` namelist for NEMO version number, MPI choice etc. (see `above <nemo_in>`_ for more information)
+#. Create a *Pull Request* from that branch to main (at this point a test build will be triggered (this can take ~45 minutes per MPI build requested)
+#. If successful the *merge* will be available. Click merge and a NEMO SIF will be built and released under the *version* specified. (again this can take ~45 minutes per MPI build requested)
+
+The branch can now either be deleted or held open for further changes to `NEMO_in` and subsequent releases.
 
 .. note::
    
-    If the tag in the `VERSION` file is not incremented then a new release is not built
+    If the tag in the `VERSION` file is not incremented then a new release is not built.
 
 As previously outlined in the Quick Start guide, to download the released NEMO SIF either use:
 
