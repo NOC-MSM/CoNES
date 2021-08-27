@@ -194,7 +194,7 @@ An individual NEMO SIF build can be created using the following steps:
 
 #. Fork the `CoNES`_ repository into `$FORKED_CoNES_ID`
 #. Create a new branch in `$FORKED_CoNES_ID`
-#. Edit the `VERSION` file to something approprate (e.g. 0.0.1)
+#. Edit the :code:`VERSION` file to something approprate (e.g. 0.0.1)
 #. Edit the `NEMO_in` namelist for NEMO version number, MPI choice etc. (see `above <nemo_in>`_ for more information)
 #. Create a *Pull Request* from that branch to main (at this point a test build will be triggered (this can take ~45 minutes per MPI build requested)
 #. If successful the *merge* will be available. Click merge and a NEMO SIF will be built and released under the *version* specified. (again this can take ~45 minutes per MPI build requested)
