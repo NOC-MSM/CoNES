@@ -4,7 +4,7 @@
 Building a NEMO Container
 =========================
 
-.. _CoNES: https://github.com/NOC-MSM/CoNES/releases/latest
+.. _CoNES: https://github.com/NOC-MSM/CoNES/
 
 In this section an overview of how a NEMO SIF is built under the `CoNES`_ project is presented.
 Using a definition file, a SIF can be built on the command line or using GitHub actions. 
