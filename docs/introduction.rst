@@ -40,7 +40,7 @@ operating systems.
 Why use containers?
 ===================
 
- *  Runtime environment is independant of the host.
+ *  Runtime environment is independent of the host.
 
  *  Highly configurable.
 
@@ -75,6 +75,6 @@ Singularity containers can provide all the tools, programs and scripts
 to enable end-to-end science no matter what environment the user is
 running. Data centres currently procure and archive data, journals curate 
 scientific discourse, but there is a disconnect between the two. 
-By encapsulating the methods in a container and pubishing them,
+By encapsulating the methods in a container and publishing them,
 the science can be archived, distributed and replicated (or built upon)
 by others.
