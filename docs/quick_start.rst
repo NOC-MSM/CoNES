@@ -107,28 +107,34 @@ Singularity can also *pull* just knowing the URL. For example:
 
     singularity pull https://github.com/NOC-MSM/CoNES/releases/download/0.0.1/NOC-MSM-CoNES.nemo.sif
 
-There are also other tools under development that can achieve similar results. The *singularity-hpc* tool is 
-designed to be able to parse and handle container URIs automatically. For the NEMO SIFs, you could do:
+.. 
+    There are also other tools under development that can achieve similar results. The *singularity-hpc* tool is 
+    designed to be able to parse and handle container URIs automatically. For the NEMO SIFs, you could do:
 
-.. code-block:: bash
+    .. code-block:: bash
 
-    shpc pull gh://NOC-MSM/CoNES/0.0.1:nemo
+        shpc pull gh://NOC-MSM/CoNES/0.0.1:nemo
 
-or even write the container URI into a registry entry:
+    or even write the container URI into a registry entry:
 
-.. code-block:: bash
+    .. code-block:: bash
 
-    gh: NOC-MSM/CoNES
-    latest:
-      nemo: "0.0.1"
-    tags:
-      "nemo": "0.0.1"
-    maintainer: "@jdha"
-    url: https://github.com/NOC-MSM/CoNES
+        gh: NOC-MSM/CoNES
+        latest:
+          nemo: "0.0.1"
+        tags:
+          "nemo": "0.0.1"
+        maintainer: "@jdha"
+        url: https://github.com/NOC-MSM/CoNES
+
+    .. note::
+
+       More information on these last two methods can be found at:
+       `Singularity HPC <https://github.com/singularityhub/singularity-hpc>`_.
 
 .. note::
 
-   More information on these last two methods can be found at:
+   More information on other methods can be found at:
    `Singularity HPC <https://github.com/singularityhub/singularity-hpc>`_.
 
 ----------------
