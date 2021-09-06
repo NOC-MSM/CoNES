@@ -19,7 +19,7 @@ information on installing and using Singularity on different architectures
 please refer to the `Singularity Guide`_.
 
 By way of example, an outline of how to setup, download and run a NEMO SIF using the
-`ARCHER2 HPC Service`_ follows. This make use of the pre-built NEMO SIFs released under
+`ARCHER2 HPC Service`_ follows. This makes use of the pre-built NEMO SIFs released under
 `CoNES`_. For this example the `NEMO AMM7 
 configuration <https://github.com/NOC-MSM/HPC_Scaling_AMM7>`_ is used. 
 
