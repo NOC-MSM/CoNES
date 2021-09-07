@@ -44,8 +44,8 @@ The full definition file can be found `here <https://github.com/NOC-MSM/CoNES/bl
         input_files/arch_files /input_files/arch/nemo/arch-files
 
 
-The ``%files`` section lists the external files on the host system required to build the SIF. 
-The first of these is a simple *namelist* file ``NEMO_in``, which provides a handlful of 
+The :singularity:`%files` section lists the external files on the host system required to build the SIF. 
+The first of these is a simple *namelist* file :file:`NEMO_in`, which provides a handlful of 
 variables that allow the user to customise the build process:
 
 .. _nemo_in:
@@ -62,13 +62,13 @@ variables that allow the user to customise the build process:
                                    # If empty and building on the commandline, the build terminate
 
 
-In addtion, there are several other input files: ``MY_SRC.tar.gz`` contains any updated source files 
-required to build NEMO; ``setup_nemo`` is the NEMO/XIOS build script, which checks out the source 
-code and builds NEMO/XIOS using the ``arch_files`` compiler directives for the container environment.
+In addtion, there are several other input files: :file:`MY_SRC.tar.gz` contains any updated source files 
+required to build NEMO; :file:`setup_nemo` is the NEMO/XIOS build script, which checks out the source 
+code and builds NEMO/XIOS using the :file:`arch_files` compiler directives for the container environment.
 
 In the :singularity:`%post` section, the base OS is defined along with mandatory binaries. Any relevant
-dependencies not available via :bash:``apt-get`` (MPI, HDF5 and netCDF) are built from source. Finally, NEMO 
-and XIOS are compiled using the previously imported setup script from :singularity:``%files``. The following is 
+dependencies not available via :bash:`apt-get` (MPI, HDF5 and netCDF) are built from source. Finally, NEMO 
+and XIOS are compiled using the previously imported setup script from :singularity:`%files`. The following is 
 truncated for brevity:
 
 .. code-block:: singularity
@@ -107,7 +107,7 @@ truncated for brevity:
     ...
         /input_files/setup_nemo -x /nemo -w /nemo -m singularity -v $NEMO_VERSION -c gnu
 
-Next the ``%environment`` section defines the path to the HDF libraries required by the container at runtime.
+Next the :singularity:`%environment` section defines the path to the HDF libraries required by the container at runtime.
 
 .. code-block:: singularity
 
@@ -115,7 +115,7 @@ Next the ``%environment`` section defines the path to the HDF libraries required
 
         export LD_LIBRARY_PATH=/opt/hdf5/install/lib:$LD_LIBRARY_PATH
 
-And ``%runtime`` defines the action taken when the container is executed. As both NEMO and XIOS
+And :singularity:`%runtime` defines the action taken when the container is executed. As both NEMO and XIOS
 have been built, there are checks to see which is required.
 
 .. code-block:: singularity
@@ -160,7 +160,7 @@ a SIF can be built issuing the following:
 
      sudo singularity build nemo.sif Singularity.nemo
 
-The command requires ``sudo`` just as installing software on your local machine requires root privileges.
+The command requires :bash:`sudo` just as installing software on your local machine requires root privileges.
 If this is not an option the SIF can either be built as *fakeroot* on the host system, or via a GitHub
 repository.
 
@@ -240,123 +240,63 @@ Overview of the {Singularity} Interface
 Generating a .def file from a SIF
 ---------------------------------
 
+The definition meta data is stored in a SIF file and can be access using the :bash:`inspect`
+command:
+.. code-block:: bash
+
+    $ singularity inspect --deffile nemo.sif > nemo.def
+
+The resulting file can in turn be edited and used to build subsequent container files.
+
 Interogating a SIF
 ------------------
+
+Once the :file:`nemo.sif` is on the local system, it can accessed via the
+`shell <https://www.sylabs.io/guides/3.8/user-guide/cli/singularity_shell.html>`_
+command. It is then possible to traverse the directory structure of the SIF in the
+same manner as any other OS:
+
+.. code-block:: bash
+
+    $ singularity shell nemo.sif
+
+    Singularity> cd /nemo/nemo/cfgs/NEMO/EXP00
+
+
+To leave the container simply type :bash:`exit` as with any other system.
 
 Sandbox/Writable Container
 --------------------------
 
+If root or *fakeroot* access is available it is possible to build a :bash:`sandbox`
+(container in a directory) using the following command:
 
-Shell
-=====
+.. code-block:: bash
 
-The `shell <https://www.sylabs.io/guides/\{version\}/user-guide/cli/singularity_shell.html>`_
-command allows you to spawn a new shell within your container and interact with
-it as though it were a small virtual machine.
+    $ sudo singularity build --sandbox nemo_sandbox nemo.def
 
-.. code-block:: none
+This command creates a directory called nemo_sandbox that is writable:
 
-    $ singularity shell lolcow_latest.sif
+.. code-block:: bash
 
-    {Singularity} lolcow_latest.sif:~>
+    $ sudo singularity shell --writable nemo_sandbox
 
-
-The change in prompt indicates that you have entered the container (though you
-should not rely on that to determine whether you are in container or not).
-
-Once inside of a {Singularity} container, you are the same user as you are on the
-host system.
-
-.. code-block:: none
-
-    {Singularity} lolcow_latest.sif:~> whoami
-    david
-
-    {Singularity} lolcow_latest.sif:~> id
-    uid=1000(david) gid=1000(david) groups=1000(david),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),116(lpadmin),126(sambashare)
-
-``shell`` also works with the ``library://``, ``docker://``, and ``shub://``
-URIs. This creates an ephemeral container that disappears when the shell is
-exited.
-
-.. code-block:: none
-
-    $ singularity shell library://sylabsed/examples/lolcow
-
-Executing Commands
-==================
-
-The `exec <https://www.sylabs.io/guides/\{version\}/user-guide/cli/singularity_exec.html>`_
-command allows you to execute a custom command within a container by specifying
-the image file. For instance, to execute the ``cowsay`` program within the
-``lolcow_latest.sif`` container:
-
-.. code-block:: none
-
-    $ singularity exec lolcow_latest.sif cowsay moo
-     _____
-    < moo >
-     -----
-            \   ^__^
-             \  (oo)\_______
-                (__)\       )\/\
-                    ||----w |
-                    ||     ||
-
-``exec`` also works with the ``library://``, ``docker://``, and ``shub://``
-URIs. This creates an ephemeral container that executes a command and
-disappears.
-
-.. code-block:: none
-
-    $ singularity exec library://sylabsed/examples/lolcow cowsay "Fresh from the library!"
-     _________________________
-    < Fresh from the library! >
-     -------------------------
-            \   ^__^
-             \  (oo)\_______
-                (__)\       )\/\
-                    ||----w |
-                    ||     ||
-
-
-===================
-
-To build into a ``sandbox`` (container in a directory) use the
-``build --sandbox`` command and option:
-
-.. code-block:: none
-
-    $ sudo singularity build --sandbox ubuntu/ library://ubuntu
-
-This command creates a directory called ``ubuntu/`` with an entire Ubuntu
-Operating System and some {Singularity} metadata in your current working
-directory.
-
-You can use commands like ``shell``, ``exec`` , and ``run`` with this directory
-just as you would with a {Singularity} image. If you pass the ``--writable``
-option when you use your container you can also write files within the sandbox
-directory (provided you have the permissions to do so).
-
-.. code-block:: none
-
-    $ sudo singularity exec --writable ubuntu touch /foo
-
-    $ singularity exec ubuntu/ ls /foo
-    /foo
+This can be helpful when first constructing the container.
 
 Converting images from one format to another
 ============================================
 
-The ``build`` command allows you to build a container from an existing
-container. This means that you can use it to convert a container from one format
-to another. For instance, if you have already created a sandbox (directory) and
-want to convert it to the default immutable image format (squashfs) you can do
-so:
+In addtion to building from a definition file the :bash:`build` command allows 
+for the conversion of containers. For example:
 
 .. code-block:: none
 
-    $ singularity build new-sif sandbox
+    $ singularity build nemo.sif nemo_sandbox
 
-Doing so may break reproducibility if you have altered your sandbox outside of
-the context of a definition file, so you are advised to exercise care.
+converts the :file:`nemo_sandbox` directory into an immutable SIF.
+
+.. note::
+
+   More information on there and other methods can be found
+   in the `Singularity User Guide <https://www.sylabs.io/guides/3.8/user-guide/>`_.
+
