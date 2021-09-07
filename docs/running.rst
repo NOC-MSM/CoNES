@@ -21,7 +21,7 @@ NEMO simulation. In this case it serves as the mount point for the SIF to read a
 
 .. note:
 
-   At runtime the SIF will mount EXP00 and symbolically link all the namelists and XML files in the :bash:`SHARDED` directory within
+   At runtime the SIF will mount EXP00 and symbolically link all the namelists and XML files in the :bash:`SHARED` directory within
    the container. If any namelist structures have been modified through the addition of :bash:`MY_SRC` these will have to updated
    host-side for the simulation to run.
 
