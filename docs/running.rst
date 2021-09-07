@@ -12,20 +12,20 @@ Running a container
    :class: highlight
 
 The NEMO SIF is constructed in such a way that both *NEMO* and *XIOS* are available within the container. The SIF is an
-instance of *NEMO/XIOS* as specified by the `NEMO_in`_ file. This will be version specific, and may have been
-modified with *user* specified `MY_SRC` code, additional components (e.g. ICE, TOP etc) and/or compiler keys. What the 
+instance of *NEMO/XIOS* as specified by the :file:`NEMO_in` file. This will be version specific, and may have been
+modified with *user* specified :bash:`MY_SRC` code, additional components (e.g. ICE, TOP etc) and/or compiler keys. What the 
 container does not contain is the configuration specific files to run a simulation. As eluded to in the `Quick Start Guide`_
-within the `$RUNDIR` a directory called `EXP00` must be created. This behaves in much the same way as in a *traditional*
+within the :bash:`$RUNDIR` a directory called :bash:`EXP00` must be created. This behaves in much the same way as in a *traditional*
 NEMO simulation. In this case it serves as the mount point for the SIF to read and write data. Any NEMO input files 
-(netcdf, namelists etc) must be located in this directory. All output from the simulation will also be written to `EXP00`.
+(netcdf, namelists etc) must be located in this directory. All output from the simulation will also be written to :bash:`EXP00`.
 
 .. note:
 
-   At runtime the SIF will mount EXP00 and symbolically link all the namelists and XML files in the :code:`SHARDED` directory within
-   the container. If any namelist structures have been modified through the addition of :code:`MY_SRC` these will have to updated
+   At runtime the SIF will mount EXP00 and symbolically link all the namelists and XML files in the :bash:`SHARDED` directory within
+   the container. If any namelist structures have been modified through the addition of :bash:`MY_SRC` these will have to updated
    host-side for the simulation to run.
 
-In its simplest form to run a NEMO SIF on a single core without an XIOS server (binding host directory `EXP00`):
+In its simplest form to run a NEMO SIF on a single core without an XIOS server (binding host directory :bash:`EXP00`):
 
 .. code-block:: bash
 
