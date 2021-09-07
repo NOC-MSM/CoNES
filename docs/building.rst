@@ -115,7 +115,7 @@ Next the :singularity:`%environment` section defines the path to the HDF librari
 
         export LD_LIBRARY_PATH=/opt/hdf5/install/lib:$LD_LIBRARY_PATH
 
-And :singularity:`%runtime` defines the action taken when the container is executed. As both NEMO and XIOS
+And :singularity:`%runscript` defines the action taken when the container is executed. As both NEMO and XIOS
 have been built, there are checks to see which is required.
 
 .. code-block:: singularity
