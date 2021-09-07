@@ -32,6 +32,7 @@ Addtional SIF
 * Cray/MPICH  O1 Bloated
 * Cray/MPICH  O1 No Output / Heavy Output
 * Cray/MPICH  O1 Bind MPI method
+* Cray/MPICH  O1 multi-stage + apps
 
 ----------
 Bare-metal
