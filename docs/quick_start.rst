@@ -105,7 +105,7 @@ Singularity can also *pull* just knowing the URL. For example:
 
 .. code-block:: bash
 
-    singularity pull https://github.com/NOC-MSM/CoNES/releases/download/0.0.1/NOC-MSM-CoNES.nemo.sif
+    singularity pull https://github.com/NOC-MSM/CoNES/releases/download/0.0.1/NOC-MSM-CoNES.nemo-ompi.sif
 
 .. 
     There are also other tools under development that can achieve similar results. The *singularity-hpc* tool is 
