@@ -5,9 +5,9 @@ Introduction to CoNES
 =====================
 
 .. _eCSE: https://www.archer2.ac.uk/ecse/
-.. _`ARCHER2 HPC service`: www.archer2.ac.uk
+.. _`ARCHER2 HPC service`: https://www.archer2.ac.uk
 .. _Singularity: https://www.sylabs.io
-.. _NEMO: www.nemo-ocean.eu
+.. _NEMO: https://www.nemo-ocean.eu
 
 Containerisation of NEMO Employing Singularity (CoNES) is an eCSE_
 funded project to develop and document methods of containerisation for the NEMO 
