@@ -205,7 +205,7 @@ An individual NEMO SIF build can be created using the following steps:
 #. Create a new branch in :bash:`$FORKED_CoNES_ID`
 #. Edit the :file:`VERSION` file to something approprate (e.g. 0.0.1)
 #. Edit the :file:`NEMO_in` namelist for NEMO version number, MPI choice etc. (see `above <nemo_in>`_ for more information)
-#. Create a *Pull Request* from that branch to main (at this point a test build will be triggered (this can take ~45 minutes per MPI build requested)
+#. Create a *Pull Request* from that branch to main (at this point a test build will be triggered, which can take ~45 minutes per MPI build requested)
 #. If successful the *merge* will be available. Click merge and a NEMO SIF will be built and released under the *version* specified. (again this can take ~45 minutes per MPI build requested)
 
 The branch can now either be deleted or held open for further changes to :file:`NEMO_in` and subsequent releases.
@@ -242,6 +242,7 @@ Generating a .def file from a SIF
 
 The definition meta data is stored in a SIF file and can be access using the :bash:`inspect`
 command:
+
 .. code-block:: bash
 
     $ singularity inspect --deffile nemo.sif > nemo.def
