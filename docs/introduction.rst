@@ -6,7 +6,7 @@ Introduction to CoNES
 
 .. _eCSE: https://www.archer2.ac.uk/ecse/
 .. _`ARCHER2 HPC service`: www.archer2.ac.uk
-.. _Singularity: sylabs.io
+.. _Singularity: https://www.sylabs.io
 .. _NEMO: www.nemo-ocean.eu
 
 Containerisation of NEMO Employing Singularity (CoNES) is an eCSE_
