@@ -14,7 +14,7 @@ Running a container
 The NEMO SIF is constructed in such a way that both *NEMO* and *XIOS* are available within the container. The SIF is an
 instance of *NEMO/XIOS* as specified by the :file:`NEMO_in` file. This will be version specific, and may have been
 modified with *user* specified :bash:`MY_SRC` code, additional components (e.g. ICE, TOP etc) and/or compiler keys. What the 
-container does not contain is the configuration specific files to run a simulation. As eluded to in the `Quick Start Guide`_
+container does not contain is the configuration specific files to run a simulation. As eluded to in the `Quick Start Guide <quick_start>`_
 within the :bash:`$RUNDIR` a directory called :bash:`EXP00` must be created. This behaves in much the same way as in a *traditional*
 NEMO simulation. In this case it serves as the mount point for the SIF to read and write data. Any NEMO input files 
 (netcdf, namelists etc) must be located in this directory. All output from the simulation will also be written to :bash:`EXP00`.
@@ -40,7 +40,7 @@ Runscripts from the exmaple AMM7 repo set up to use mpirun adn slurm (Any exampl
 
     mpirun --oversubscribe -rf rankfile --report-bindings -v -np 1 --bind-to core \
            -np 1  --bind-to core singularity run nemo.sif xios EXP00 : \
-           --mca btl_vader_single_copy_mechanim none --mca btl ^sm --mca btl_openib_allow_ib true \
+           --mca btl_vader_single_copy_mechanism none --mca btl ^sm --mca btl_openib_allow_ib true \
            -np 95 --bind-to core singularity run nemo.sif nemo EXP00 
 
 likewise for :bash:`srun`:
@@ -59,9 +59,9 @@ Singularity MPI flags used in the above examples:
 btl: Byte transfer layer (point-to-point byte movement)
  Modular Component Architecture (MCA) is the backbone for much of Open MPI's functionality
 
-* :bash:`--mca btl_vader_single_copy_mechanim none`: Something to do with memory?
-* :bash:`--mca btl ^sm`: Why disable shared memory?
-* :bash:`--mca btl_openib_allow_ib true`: Infiniband Support?
+* :bash:`--mca btl_vader_single_copy_mechanism none`: Explain
+* :bash:`--mca btl ^sm`: Explain
+* :bash:`--mca btl_openib_allow_ib true`: Explain
 
 other flags are associated with ARCHER2 system:
 
@@ -70,7 +70,7 @@ other flags are associated with ARCHER2 system:
 * :bash:`--report-bindings`: report core/process layout.
 * :bash:`-v`: verbose.
 * :bash:`-np`: number of processes.
-* :bash:`--bind-to core`: 
+* :bash:`--bind-to core`: one process per specified core.
 
 On the ARCHER2 HPC service the distribution of two executables is handled using a :bash:`rankfile` when using openMPI 
 and :bash:`mpirun`, and :bash:`--pack-group` with cpu addesses when using :bash:`srun` and MPICH.
