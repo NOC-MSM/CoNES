@@ -153,7 +153,7 @@ have been built, there are checks to see which is required.
 The Build
 =========
 
-Using the NEMO definition file, `Singularity.nemo <SIF https://github.com/NOC-MSM/CoNES/blob/main/Singularity.nemo>`_,
+Using the NEMO definition file, `Singularity.nemo <https://github.com/NOC-MSM/CoNES/blob/main/Singularity.nemo>`_,
 a SIF can be built issuing the following:
 
 .. code-block:: bash
