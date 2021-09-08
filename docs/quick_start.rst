@@ -77,7 +77,7 @@ For a full set of options available in the ``amm7_setup_archer2`` issue the comm
 
    ./HPC_Scaling_AMM7/scripts/setup/amm7_setup_archer2 -h
 
-Or visit the `HPC_Scaling_AMM7 GitHub repository <https://github.com:NOC-MSM/HPC_Scaling_AMM7>`_.
+Or visit the `HPC_Scaling_AMM7 GitHub repository <https://github.com/NOC-MSM/HPC_Scaling_AMM7>`_.
 
 
 -----------------------------
