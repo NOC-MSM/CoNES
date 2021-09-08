@@ -1,60 +1,234 @@
 .. _building:
 
+.. role:: bash(code)
+   :language: bash
+   :class: highlight
+
+.. role:: singularity(code)
+   :language: singularity
+   :class: highlight
+
 =========================
 Building a NEMO Container
 =========================
 
-This guide is intended for bulding/running a NEMO Singularity Image File (SIF) 
-on a HPC cluster or Linux machine that has Singularty installed. It should also 
-be possible to build and run a NEMO SIF on MacOS/Windows machines. For further 
-information on installing and using Singularity on different architecture 
-please refer to the `Sylabs instalation guides <https://sylabs.io/guides/>`.
+.. _CoNES: https://github.com/NOC-MSM/CoNES/
 
-This section provides an overview of downloading and running a NEMO SIF on the
-ARCHER2 HPC service. The methods here should be widely applicatable to other HPC
-systems.
-
-In this example we will make use of a pre-build NEMO SIF and
-The simplest way to get up and running is to download a pre-build NEMO SIF.
-You will need a Linux system that is has an up-to-date Singularity installation
-
-
+In this section an overview of how a NEMO SIF is built under the `CoNES`_ project is presented.
+Using a definition file, a SIF can be built on the command line or using GitHub actions. 
+Sandbox builds, allowing the user to shell/read/write access to the container,
+converting image files and producing definition files from existing SIFs will also be touched on.
+First the definiation file used in the various builds is summarised: 
 
 Definition File
 ===============
 
+The Singularity definition file provides a recipe to build the reporoducible SIF. It contains information
+about the base OS, software to compile and environment setup. The following stripped
+down example of how to build a NEMO/XIOS SIF describes the process used in the `CoNES`_ project. 
+The full definition file can be found `here <https://github.com/NOC-MSM/CoNES/blob/main/Singularity.nemo>`_.
 
-Build Environment
-=================
+.. code-block:: singularity
 
+    Bootstrap: library
+    From: ubuntu:20.04
+
+    ##############################
+    # NEMO Singularity Container #
+    ##############################    
+ 
+    %files
+        input_files/NEMO_in /input_files/NEMO_in
+        input_files/MY_SRC.tar.gz /input_files/MY_SRC.tar.gz
+        input_files/setup_nemo /input_files/setup_nemo
+        input_files/arch_files /input_files/arch/nemo/arch-files
+
+
+The :singularity:`%files` section lists the external files on the host system required to build the SIF. 
+The first of these is a simple *namelist* file :file:`NEMO_in`, which provides a handlful of 
+variables that allow the user to customise the build process:
+
+.. _nemo_in:
+
+.. code-block:: sh
+
+    MY_SRC=                        # If blank no need to do anything
+    NEMO_VERSION=4.0.4             # Check that VERSION is 4.0.[2-6], 4.0_HEAD or trunk
+    XIOS_REVISION=                 # Use default value if empty
+    NEMO_COMPONENTS='OCE'          # Which NEMO components to build OCE/ICE/TOP etc
+    CPP_KEYS=                      # Any additional compiler keys to include? 
+    MPI=                           # Which MPI implementation to use MPICH | OMPI
+                                   # If empty and using GH actions, both will be built 
+                                   # If empty and building on the commandline, the build terminate
+
+
+In addtion, there are several other input files: :file:`MY_SRC.tar.gz` contains any updated source files 
+required to build NEMO; :file:`setup_nemo` is the NEMO/XIOS build script, which checks out the source 
+code and builds NEMO/XIOS using the :file:`arch_files` compiler directives for the container environment.
+
+In the :singularity:`%post` section, the base OS is defined along with mandatory binaries. Any relevant
+dependencies not available via :bash:`apt-get` (MPI, HDF5 and netCDF) are built from source. Finally, NEMO 
+and XIOS are compiled using the previously imported setup script from :singularity:`%files`. The following is 
+truncated for brevity:
+
+.. code-block:: singularity
+
+    %post
+
+        ##
+        # Install apt-get binaries, build necessary dependencies, compile NEMO/XIOS
+        ##
+
+        apt install -y locales #locales-all
+        locale-gen en_GB en_GB.UTF-8 # en_US en_US.UTF-8
+
+        apt install -y software-properties-common
+        add-apt-repository universe
+        apt update
+
+        apt install -y python \
+    ...
+        if [ "$MPI" = "MPICH" ]
+        then
+
+             apt install -y libfabric-dev
+
+             wget http://www.mpich.org/static/downloads/3.4.2/mpich-3.4.2.tar.gz
+             tar -xvzf mpich-3.4.2.tar.gz -C mpi --strip-components 1
+             rm mpich-3.4.2.tar.gz
+             cd mpi
+
+             ./configure CC=gcc CXX=g++ FC=gfortran --prefix=/opt/mpi/install FFLAGS=-fallow-argument-mismatch
+             make
+             make install
+
+        elif [ "$MPI" = "OMPI" ]
+        then
+    ...
+        /input_files/setup_nemo -x /nemo -w /nemo -m singularity -v $NEMO_VERSION -c gnu
+
+Next the :singularity:`%environment` section defines the path to the HDF libraries required by the container at runtime.
+
+.. code-block:: singularity
+
+    %environment
+
+        export LD_LIBRARY_PATH=/opt/hdf5/install/lib:$LD_LIBRARY_PATH
+
+And :singularity:`%runscript` defines the action taken when the container is executed. As both NEMO and XIOS
+have been built, there are checks to see which is required.
+
+.. code-block:: singularity
+
+    %runscript
+        #!/bin/bash
+
+        if ! [[ $1 == "nemo" || $1 == "xios" ]]
+        then
+           echo "The program argument should be either 'nemo' or 'xios'"
+           exit 1
+        fi
+
+        results_dir=$2
+
+        if [[ -z $2 ]]
+        then
+           results_dir=$SLURM_JOB_ID
+        fi
+
+        if [[ -z $results_dir ]]
+        then
+            echo "Please supply an output directory"
+            exit 1
+        fi
+
+        if [[ $1 == 'nemo' ]]
+        then
+            /opt/nemo/nemo
+        else
+            /opt/xios/xios
+        fi
+
+
+The Build
+=========
+
+Using the NEMO definition file, `Singularity.nemo <SIF https://github.com/NOC-MSM/CoNES/blob/main/Singularity.nemo>`_,
+a SIF can be built issuing the following:
+
+.. code-block:: bash
+
+     sudo singularity build nemo.sif Singularity.nemo
+
+The command requires :bash:`sudo` just as installing software on your local machine requires root privileges.
+If this is not an option the SIF can either be built as *fakeroot* on the host system, or via a GitHub
+repository.
 
 Fake Root
 =========
 
+To build a SIF, root privilege is required. If the user does not have root access the *fakeroot* feature can
+be used. An unprivileged user can build or run a container as a *fake root* user. This feature is granted by
+the system admin of the host system. See Sylabs guide on 
+`fakeroot <https://sylabs.io/guides/3.8/user-guide/fakeroot.html#fakeroot>`_ access for more details.
 
 GitHub Builds
 =============
 
---------
-Overview
---------
+If building locally is not an option then it is also possible to build and 
+release Singularity containers on `GitHub <http://www.github.com>`_. 
+`Singularity Deploy <https://github.com/singularityhub/singularity-deploy>`_
+developed by `Vanessa Sochat <https://github.com/vsoch>`_ has been modified 
+to allow users to fork the `GitHub CoNES repository <https://github.com/NOC-MSM/CoNES>`_
+and, using `GitHub Actions <https://github.com/features/actions>`_, build and 
+release a *bespoke* NEMO singularity container in much the same manner as
+described previously.
 
-------
-Inputs
-------
 
+The `CoNES`_ repository has been set up such that:
 
---------------
-How to develop
---------------
+* the container is updated/developed via a branch
 
------------
-How to Pull
------------
+* the container build will be tested on a pull request
 
---------------
-GitHub Actions
---------------
+* a release will be triggered on merge into main
+  
+This workflow can easily be modified by altering:
+  
+* :file:`.github/workflows/builder.yml` for the container release
+
+* :file:`.github/workflows/test.yml` for the testing of builds
+
+An individual NEMO SIF build can be created using the following steps: 
+
+#. Fork the `CoNES`_ repository into :bash:`$FORKED_CoNES_ID`
+#. Create a new branch in :bash:`$FORKED_CoNES_ID`
+#. Edit the :file:`VERSION` file to something approprate (e.g. 0.0.1)
+#. Edit the :file:`NEMO_in` namelist for NEMO version number, MPI choice etc. (see `above <nemo_in>`_ for more information)
+#. Create a *Pull Request* from that branch to main (at this point a test build will be triggered (this can take ~45 minutes per MPI build requested)
+#. If successful the *merge* will be available. Click merge and a NEMO SIF will be built and released under the *version* specified. (again this can take ~45 minutes per MPI build requested)
+
+The branch can now either be deleted or held open for further changes to :file:`NEMO_in` and subsequent releases.
+
+.. note::
+   
+    If the tag in the `VERSION` file is not incremented then a new release is not built.
+
+As previously outlined in the Quick Start guide, to download the released NEMO SIF either use:
+
+.. code-block:: bash
+
+    wget -c https://github.com/$FORKED_CoNES_ID/releases/download/$VERSION/$FORKED_CoNES_ID.nemo.sif -o nemo.sif
+
+or Singularity can also *pull* just knowing the URL. For example:
+
+.. code-block:: bash
+
+    singularity pull https://github.com/$FORKED_CoNES_ID/CoNES/releases/download/$VERSION/$FORKED_CoNES_ID.nemo.sif
+
+.. hint::
+  
+    You can also build the download of the new NEMO SIF into a setup script such as the one used in the `Quick Start Guide <quick_start>`_.
 
 
 Further Features
@@ -66,272 +240,63 @@ Overview of the {Singularity} Interface
 Generating a .def file from a SIF
 ---------------------------------
 
+The definition meta data is stored in a SIF file and can be access using the :bash:`inspect`
+command:
+.. code-block:: bash
+
+    $ singularity inspect --deffile nemo.sif > nemo.def
+
+The resulting file can in turn be edited and used to build subsequent container files.
+
 Interogating a SIF
 ------------------
+
+Once the :file:`nemo.sif` is on the local system, it can accessed via the
+`shell <https://www.sylabs.io/guides/3.8/user-guide/cli/singularity_shell.html>`_
+command. It is then possible to traverse the directory structure of the SIF in the
+same manner as any other OS:
+
+.. code-block:: bash
+
+    $ singularity shell nemo.sif
+
+    Singularity> cd /nemo/nemo/cfgs/NEMO/EXP00
+
+
+To leave the container simply type :bash:`exit` as with any other system.
 
 Sandbox/Writable Container
 --------------------------
 
+If root or *fakeroot* access is available it is possible to build a :bash:`sandbox`
+(container in a directory) using the following command:
 
-Shell
-=====
+.. code-block:: bash
 
-The `shell <https://www.sylabs.io/guides/\{version\}/user-guide/cli/singularity_shell.html>`_
-command allows you to spawn a new shell within your container and interact with
-it as though it were a small virtual machine.
+    $ sudo singularity build --sandbox nemo_sandbox nemo.def
 
-.. code-block:: none
+This command creates a directory called nemo_sandbox that is writable:
 
-    $ singularity shell lolcow_latest.sif
+.. code-block:: bash
 
-    {Singularity} lolcow_latest.sif:~>
+    $ sudo singularity shell --writable nemo_sandbox
 
-
-The change in prompt indicates that you have entered the container (though you
-should not rely on that to determine whether you are in container or not).
-
-Once inside of a {Singularity} container, you are the same user as you are on the
-host system.
-
-.. code-block:: none
-
-    {Singularity} lolcow_latest.sif:~> whoami
-    david
-
-    {Singularity} lolcow_latest.sif:~> id
-    uid=1000(david) gid=1000(david) groups=1000(david),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),116(lpadmin),126(sambashare)
-
-``shell`` also works with the ``library://``, ``docker://``, and ``shub://``
-URIs. This creates an ephemeral container that disappears when the shell is
-exited.
-
-.. code-block:: none
-
-    $ singularity shell library://sylabsed/examples/lolcow
-
-Executing Commands
-==================
-
-The `exec <https://www.sylabs.io/guides/\{version\}/user-guide/cli/singularity_exec.html>`_
-command allows you to execute a custom command within a container by specifying
-the image file. For instance, to execute the ``cowsay`` program within the
-``lolcow_latest.sif`` container:
-
-.. code-block:: none
-
-    $ singularity exec lolcow_latest.sif cowsay moo
-     _____
-    < moo >
-     -----
-            \   ^__^
-             \  (oo)\_______
-                (__)\       )\/\
-                    ||----w |
-                    ||     ||
-
-``exec`` also works with the ``library://``, ``docker://``, and ``shub://``
-URIs. This creates an ephemeral container that executes a command and
-disappears.
-
-.. code-block:: none
-
-    $ singularity exec library://sylabsed/examples/lolcow cowsay "Fresh from the library!"
-     _________________________
-    < Fresh from the library! >
-     -------------------------
-            \   ^__^
-             \  (oo)\_______
-                (__)\       )\/\
-                    ||----w |
-                    ||     ||
-
-
--------------------------
-Build images from scratch
--------------------------
-
-.. _sec:buildimagesfromscratch:
-
-{Singularity} v3.0 and above produces immutable images in the Singularity Image File (SIF)
-format. This ensures reproducible and verifiable images and allows for many
-extra benefits such as the ability to sign and verify your containers.
-
-However, during testing and debugging you may want an image format that is
-writable. This way you can ``shell`` into the image and install software and
-dependencies until you are satisfied that your container will fulfill your
-needs. For these scenarios, {Singularity} also supports the ``sandbox`` format
-(which is really just a directory).
-
-Sandbox Directories
-===================
-
-To build into a ``sandbox`` (container in a directory) use the
-``build --sandbox`` command and option:
-
-.. code-block:: none
-
-    $ sudo singularity build --sandbox ubuntu/ library://ubuntu
-
-This command creates a directory called ``ubuntu/`` with an entire Ubuntu
-Operating System and some {Singularity} metadata in your current working
-directory.
-
-You can use commands like ``shell``, ``exec`` , and ``run`` with this directory
-just as you would with a {Singularity} image. If you pass the ``--writable``
-option when you use your container you can also write files within the sandbox
-directory (provided you have the permissions to do so).
-
-.. code-block:: none
-
-    $ sudo singularity exec --writable ubuntu touch /foo
-
-    $ singularity exec ubuntu/ ls /foo
-    /foo
+This can be helpful when first constructing the container.
 
 Converting images from one format to another
 ============================================
 
-The ``build`` command allows you to build a container from an existing
-container. This means that you can use it to convert a container from one format
-to another. For instance, if you have already created a sandbox (directory) and
-want to convert it to the default immutable image format (squashfs) you can do
-so:
+In addtion to building from a definition file the :bash:`build` command allows 
+for the conversion of containers. For example:
 
 .. code-block:: none
 
-    $ singularity build new-sif sandbox
+    $ singularity build nemo.sif nemo_sandbox
 
-Doing so may break reproducibility if you have altered your sandbox outside of
-the context of a definition file, so you are advised to exercise care.
+converts the :file:`nemo_sandbox` directory into an immutable SIF.
 
-{Singularity} Definition Files
-==============================
+.. note::
 
-For a reproducible, verifiable and production-quality container you should
-build a SIF file using a {Singularity} definition file. This also makes it easy to
-add files, environment variables, and install custom software, and still start
-from your base of choice (e.g., the Container Library).
+   More information on there and other methods can be found
+   in the `Singularity User Guide <https://www.sylabs.io/guides/3.8/user-guide/>`_.
 
-A definition file has a header and a body. The header determines the base
-container to begin with, and the body is further divided into sections that
-perform things like software installation, environment setup, and copying files
-into the container from host system, etc.
-
-Here is an example of a definition file:
-
-.. code-block:: singularity
-
-    BootStrap: library
-    From: ubuntu:16.04
-
-    %post
-        apt-get -y update
-        apt-get -y install fortune cowsay lolcat
-
-    %environment
-        export LC_ALL=C
-        export PATH=/usr/games:$PATH
-
-    %runscript
-        fortune | cowsay | lolcat
-
-    %labels
-        Author GodloveD
-
-
-To build a container from this definition file (assuming it is a file
-named lolcow.def), you would call build like so:
-
-.. code-block:: none
-
-    $ sudo singularity build lolcow.sif lolcow.def
-
-In this example, the header tells {Singularity} to use a base Ubuntu 16.04 image
-from the Container Library.
-
-- The ``%post`` section executes within the container at build time after the base OS has been installed. The ``%post`` section is therefore the place to perform installations of new applications.
-
-- The ``%environment`` section defines some environment variables that will be available to the container at runtime.
-
-- The ``%runscript`` section defines actions for the container to take when it is executed.
-
-- And finally, the ``%labels`` section allows for custom metadata to be added to the container.
-
-This is a very small example of the things that you can do with a :ref:`definition file <definition-files>`.
-In addition to building a container from the Container Library, you can start
-with base images from Docker Hub and use images directly from official
-repositories such as Ubuntu, Debian, CentOS, Arch, and BusyBox.  You can also
-use an existing container on your host system as a base.
-
-If you want to build {Singularity} images but you don't have administrative (root)
-access on your build system, you can build images using the `Remote Builder <https://cloud.sylabs.io/builder>`_.
-
-This quickstart document just scratches the surface of all of the things you can
-do with {Singularity}!
-
-If you need additional help or support, contact the Sylabs team:
-https://www.sylabs.io/contact/
-
-
-.. _installation-request:
-
-{Singularity} on a shared resource
-----------------------------------
-
-Perhaps you are a user who wants a few talking points and background to share
-with your administrator.  Or maybe you are an administrator who needs to decide
-whether to install {Singularity}.
-
-This document, and the accompanying administrator documentation provides answers
-to many common questions.
-
-If you need to request an installation you may decide to draft a message similar
-to this:
-
-.. code-block:: none
-
-    Dear shared resource administrator,
-
-    We are interested in having {Singularity} (https://www.sylabs.io/docs/)
-    installed on our shared resource. {Singularity} containers will allow us to
-    build encapsulated environments, meaning that our work is reproducible and
-    we are empowered to choose all dependencies including libraries, operating
-    system, and custom software. {Singularity} is already in use on many of the
-    top HPC centers around the world. Examples include:
-
-        Texas Advanced Computing Center
-        GSI Helmholtz Center for Heavy Ion Research
-        Oak Ridge Leadership Computing Facility
-        Purdue University
-        National Institutes of Health HPC
-        UFIT Research Computing at the University of Florida
-        San Diego Supercomputing Center
-        Lawrence Berkeley National Laboratory
-        University of Chicago
-        McGill HPC Centre/Calcul Québec
-        Barcelona Supercomputing Center
-        Sandia National Lab
-        Argonne National Lab
-
-    Importantly, it has a vibrant team of developers, scientists, and HPC
-    administrators that invest heavily in the security and development of the
-    software, and are quick to respond to the needs of the community. To help
-    learn more about {Singularity}, I thought these items might be of interest:
-
-        - Security: A discussion of security concerns is discussed at
-        https://www.sylabs.io/guides/{adminversion}/admin-guide/admin_quickstart.html
-
-        - Installation:
-        https://www.sylabs.io/guides/{adminversion}/admin-guide/installation.html
-
-    If you have questions about any of the above, you can contact the open
-    source list (https://groups.google.com/g/singularity-ce), join the open
-    source slack channel (singularityce.slack.com), or contact the organization
-    that supports {Singularity} directly (sylabs.io/contact). I can do my best
-    to facilitate this interaction if help is needed.
-
-    Thank you kindly for considering this request!
-
-    Best,
-
-    User
