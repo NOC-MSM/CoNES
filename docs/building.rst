@@ -168,7 +168,7 @@ Fake Root
 =========
 
 To build a SIF, root privilege is required. If the user does not have root access the *fakeroot* feature can
-be used. An unprivileged user can build or run a container as a *fake root* user. This feature is granted by
+be used. An unprivileged user can build or run a container as a *fakeroot* user. This feature is granted by
 the system admin of the host system. See Sylabs guide on 
 `fakeroot <https://sylabs.io/guides/3.8/user-guide/fakeroot.html#fakeroot>`_ access for more details.
 
