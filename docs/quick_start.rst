@@ -5,10 +5,10 @@ Quick Start
 ===========
 
 .. _eCSE: https://www.archer2.ac.uk/ecse/
-.. _`ARCHER2 HPC service`: www.archer2.ac.uk
-.. _Singularity: sylabs.io
-.. _`Singularity Guide`: https://sylabs.io/guides/
-.. _NEMO: www.nemo-ocean.eu
+.. _`ARCHER2 HPC service`: https://www.archer2.ac.uk
+.. _Singularity: https://sylabs.io
+.. _`Singularity Guide`: https://sylabs.io/guides/3.8/user-guide/
+.. _NEMO: https://www.nemo-ocean.eu
 .. _CoNES: https://github.com/NOC-MSM/CoNES/releases/latest
 
 This guide is intended for running a NEMO Singularity Image File (SIF) 
