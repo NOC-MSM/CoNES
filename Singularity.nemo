@@ -87,6 +87,13 @@ From: ubuntu:20.04
     apt clean
 
     ##
+    # Read in the environment variables that can be user-defined
+    ##
+
+    . /input_files/NEMO_in
+
+
+    ##
     # make user `nemo` - mpiexec in hdf5 `make check` complains if run as root (although we're not running it at the moment)
     ##
 
@@ -229,8 +236,6 @@ From: ubuntu:20.04
     LD_LIBRARY_PATH=/opt/hdf5/install/lib:$LD_LIBRARY_PATH
    
     cd $WORK_DIR
-
-    . /input_files/NEMO_in
    
     chmod u+x /input_files/setup_nemo 
     /input_files/setup_nemo -x /nemo -w /nemo -s /nemo/AMM7_lite -m singularity -v $NEMO_VERSION -c gnu
