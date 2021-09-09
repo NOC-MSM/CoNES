@@ -5,10 +5,10 @@ Quick Start
 ===========
 
 .. _eCSE: https://www.archer2.ac.uk/ecse/
-.. _`ARCHER2 HPC service`: www.archer2.ac.uk
-.. _Singularity: sylabs.io
-.. _`Singularity Guide`: https://sylabs.io/guides/
-.. _NEMO: www.nemo-ocean.eu
+.. _`ARCHER2 HPC service`: https://www.archer2.ac.uk
+.. _Singularity: https://sylabs.io
+.. _`Singularity Guide`: https://sylabs.io/guides/3.8/user-guide/
+.. _NEMO: https://www.nemo-ocean.eu
 .. _CoNES: https://github.com/NOC-MSM/CoNES/releases/latest
 
 This guide is intended for running a NEMO Singularity Image File (SIF) 
@@ -77,7 +77,7 @@ For a full set of options available in the ``amm7_setup_archer2`` issue the comm
 
    ./HPC_Scaling_AMM7/scripts/setup/amm7_setup_archer2 -h
 
-Or visit the `HPC_Scaling_AMM7 GitHub repository <https://github.com:NOC-MSM/HPC_Scaling_AMM7>`_.
+Or visit the `HPC_Scaling_AMM7 GitHub repository <https://github.com/NOC-MSM/HPC_Scaling_AMM7>`_.
 
 
 -----------------------------
@@ -105,7 +105,7 @@ Singularity can also *pull* just knowing the URL. For example:
 
 .. code-block:: bash
 
-    singularity pull https://github.com/NOC-MSM/CoNES/releases/download/0.0.1/NOC-MSM-CoNES.nemo.sif
+    singularity pull https://github.com/NOC-MSM/CoNES/releases/download/0.0.1/NOC-MSM-CoNES.nemo-ompi.sif
 
 .. 
     There are also other tools under development that can achieve similar results. The *singularity-hpc* tool is 

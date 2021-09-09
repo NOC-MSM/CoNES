@@ -153,7 +153,7 @@ have been built, there are checks to see which is required.
 The Build
 =========
 
-Using the NEMO definition file, `Singularity.nemo <SIF https://github.com/NOC-MSM/CoNES/blob/main/Singularity.nemo>`_,
+Using the NEMO definition file, `Singularity.nemo <https://github.com/NOC-MSM/CoNES/blob/main/Singularity.nemo>`_,
 a SIF can be built issuing the following:
 
 .. code-block:: bash
@@ -168,7 +168,7 @@ Fake Root
 =========
 
 To build a SIF, root privilege is required. If the user does not have root access the *fakeroot* feature can
-be used. An unprivileged user can build or run a container as a *fake root* user. This feature is granted by
+be used. An unprivileged user can build or run a container as a *fakeroot* user. This feature is granted by
 the system admin of the host system. See Sylabs guide on 
 `fakeroot <https://sylabs.io/guides/3.8/user-guide/fakeroot.html#fakeroot>`_ access for more details.
 
@@ -204,8 +204,8 @@ An individual NEMO SIF build can be created using the following steps:
 #. Fork the `CoNES`_ repository into :bash:`$FORKED_CoNES_ID`
 #. Create a new branch in :bash:`$FORKED_CoNES_ID`
 #. Edit the :file:`VERSION` file to something approprate (e.g. 0.0.1)
-#. Edit the :file:`NEMO_in` namelist for NEMO version number, MPI choice etc. (see `above <nemo_in>`_ for more information)
-#. Create a *Pull Request* from that branch to main (at this point a test build will be triggered (this can take ~45 minutes per MPI build requested)
+#. Edit the :file:`NEMO_in` namelist for NEMO version number, MPI choice etc. (see :ref:`above <nemo_in>` for more information)
+#. Create a *Pull Request* from that branch to main (at this point a test build will be triggered, which can take ~45 minutes per MPI build requested)
 #. If successful the *merge* will be available. Click merge and a NEMO SIF will be built and released under the *version* specified. (again this can take ~45 minutes per MPI build requested)
 
 The branch can now either be deleted or held open for further changes to :file:`NEMO_in` and subsequent releases.
@@ -234,14 +234,14 @@ or Singularity can also *pull* just knowing the URL. For example:
 Further Features
 ================
 
-Listed here a few things of use. For the full capapbility the user is referred to 
-Overview of the {Singularity} Interface
+Listed here a few things of use.
 
 Generating a .def file from a SIF
 ---------------------------------
 
 The definition meta data is stored in a SIF file and can be access using the :bash:`inspect`
 command:
+
 .. code-block:: bash
 
     $ singularity inspect --deffile nemo.sif > nemo.def
