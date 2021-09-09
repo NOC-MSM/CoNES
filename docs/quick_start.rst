@@ -93,13 +93,13 @@ For the openMPI build
 
 .. code-block:: bash
 
-    wget -c https://github.com/NOC-MSM/CoNES/releases/download/0.0.1/NOC-MSM-CoNES.nemo-ompi.sif -o nemo.sif
+    wget -c https://github.com/NOC-MSM/CoNES/releases/download/0.0.1/NOC-MSM-CoNES.nemo-ompi.sif -O nemo.sif
 
 For the MPICH build
 
 .. code-block:: bash
 
-    wget -c https://github.com/NOC-MSM/CoNES/releases/download/0.0.1/NOC-MSM-CoNES.nemo-mpich.sif -o nemo.sif
+    wget -c https://github.com/NOC-MSM/CoNES/releases/download/0.0.1/NOC-MSM-CoNES.nemo-mpich.sif -O nemo.sif
 
 Singularity can also *pull* just knowing the URL. For example:
 
