@@ -56,13 +56,14 @@ From: ubuntu:20.04
     locale-gen en_GB en_GB.UTF-8 # en_US en_US.UTF-8
 
     apt update
-    apt install -y software-properties-common
+    apt install -y software-properties-common build-essential
     add-apt-repository universe
 
     # n.b. 
     #   - libcurl4-openssl-dev also installs libcurl4 (as does curl, if not already installed)
     #   - zlib already installed
-    apt install -y python \
+    DEBIAN_FRONTEND=noninteractive && apt install -y \
+                   python \
                    subversion \
                    wget \
                    git \
@@ -134,7 +135,7 @@ From: ubuntu:20.04
         rm mpich-3.4.2.tar.gz
         cd mpi
 
-        ./configure CC=gcc CXX=g++ FC=gfortran --prefix=/opt/mpi/install FFLAGS=-fallow-argument-mismatch
+        ./configure CC=gcc CXX=g++ FC=gfortran --prefix=/opt/mpi FFLAGS=-fallow-argument-mismatch --with-device=ch3:nemesis:ofi
         make
         make install
 
@@ -146,7 +147,7 @@ From: ubuntu:20.04
         rm openmpi-4.1.1.tar.bz2
         cd mpi
         
-        ./configure CC=gcc CXX=g++ FC=gfortran --enable-mpi1-compatibility --prefix=/opt/mpi/install --with-verbs --with-slurm --with-pmix
+        ./configure CC=gcc CXX=g++ FC=gfortran --enable-mpi1-compatibility --prefix=/opt/mpi --with-verbs --with-slurm --with-pmix
         make
         make install
     else
@@ -173,7 +174,7 @@ From: ubuntu:20.04
     cd hdf
 
     # n.b. --enable-fortran specifically not needed (https://www.unidata.ucar.edu/software/netcdf/docs/getting_and_building_netcdf.html#build_default)
-    CC=/opt/mpi/install/bin/mpicc ./configure --prefix=${H5DIR} --enable-hl --enable-parallel --with-default-api-version=v18
+    CC=/opt/mpi/bin/mpicc ./configure --prefix=${H5DIR} --enable-hl --enable-parallel --with-default-api-version=v18
     make
     # maybe we shouldn't bother with make check - it complains about a lot and we're not actually building on a parallel file system
     # so some of the checks are totally irrelevant
@@ -199,7 +200,7 @@ From: ubuntu:20.04
     cd netcdf
     NCDIR=/opt/netcdf/install
     
-    CC=/opt/mpi/install/bin/mpicc FC=/opt/mpi/install/bin/mpifort CPPFLAGS="-I${H5DIR}/include" LDFLAGS="-L${H5DIR}/lib" ./configure --disable-shared --prefix=$NCDIR
+    CC=/opt/mpi/bin/mpicc FC=/opt/mpi/bin/mpifort CPPFLAGS="-I${H5DIR}/include" LDFLAGS="-L${H5DIR}/lib" ./configure --disable-shared --prefix=$NCDIR
     make
     # make check fails; maybe we should avoid running it (only 1 response from a question on the netcdf mailing list, saying it is really finicky) 
     # make check
@@ -215,7 +216,7 @@ From: ubuntu:20.04
     cd netcdf
     NFDIR=/opt/netcdf/install
     
-    CC=/opt/mpi/install/bin/mpicc FC=/opt/mpi/install/bin/mpifort CPPFLAGS="-I${NCDIR}/include -I${H5DIR}/include" LDFLAGS="-L${NCDIR}/lib -L${H5DIR}/lib" LIBS="-lhdf5 -lhdf5_hl -lcurl" ./configure --prefix=$NFDIR --disable-shared
+    CC=/opt/mpi/bin/mpicc FC=/opt/mpi/bin/mpifort CPPFLAGS="-I${NCDIR}/include -I${H5DIR}/include" LDFLAGS="-L${NCDIR}/lib -L${H5DIR}/lib" LIBS="-lhdf5 -lhdf5_hl -lcurl" ./configure --prefix=$NFDIR --disable-shared
     make
     make install
     cd ..
@@ -225,14 +226,14 @@ From: ubuntu:20.04
     # Now we can install NEMO
     ##
 
-    ln -s /opt/mpi/install/bin/mpif90 /usr/bin/mpif90
+    ln -s /opt/mpi/bin/mpif90 /usr/bin/mpif90
 
     WORK_DIR=/nemo >> $SINGULARITY_ENVIRONMENT
     mkdir $WORK_DIR
     cd $WORK_DIR
     chown nemo:nemo -R $WORK_DIR
 
-    PATH=$PATH:/opt/mpi/install/bin:/opt/hdf5/install/bin
+    PATH=$PATH:/opt/mpi/bin:/opt/hdf5/install/bin
     LD_LIBRARY_PATH=/opt/hdf5/install/lib:$LD_LIBRARY_PATH
    
     cd $WORK_DIR
