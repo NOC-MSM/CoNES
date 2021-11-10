@@ -56,7 +56,7 @@ From: ubuntu:20.04
     locale-gen en_GB en_GB.UTF-8 # en_US en_US.UTF-8
 
     apt update
-    apt install -y software-properties-common build-essential
+    apt install -y software-properties-common #build-essential
     add-apt-repository universe
 
     # n.b. 
@@ -266,7 +266,9 @@ From: ubuntu:20.04
     # minimal possible permissions: directories executable; binaries read + executable (need to be readable to that library headers can be read!); everything else only readable for g+o
     chmod -Rv 644 /opt
     find /opt -type d -print0 | xargs -0 chmod -v 511
-    find /opt -type f -exec file -i {} + | grep ":[^:]*binary[^:]*$" |  sed 's/^\(.*\):[^:]*$/\1/' | xargs chmod -v 555
+    # is the sed command a bit overkill, rather than other option? It change pdfs and zip files to executable which isn't idea... (https://stackoverflow.com/questions/36947061/see-if-binary-files-exist-in-subfolders)
+    #find /opt -type f -exec file -i {} + | grep ":[^:]*binary[^:]*$" | sed 's/^\(.*\):[^:]*$/\1/' | xargs chmod -v 555
+    find /opt -type f -exec file -i {} + | grep "text/x-c\|text/x-shellscript\|binary" | sed 's/^\(.*\):[^:]*$/\1/' | xargs chmod -v 555
 
 
     rm -rf /var/lib/apt/lists/* /var/lib/dpkg/info/*
