@@ -1,0 +1,169 @@
+#!/bin/bash
+#SBATCH --job-name=1Xg_95N
+#SBATCH --time=00:20:00
+#SBATCH --account=ecseab13
+#SBATCH --partition=standard
+#SBATCH --qos=short
+#SBATCH --reservation=shortqos
+
+#SBATCH --partition=standard
+#SBATCH --nodes=1
+#SBATCH --ntasks=57
+#SBATCH --ntasks-per-node=57
+#SBATCH --ntasks-per-core=1
+
+#SBATCH hetjob
+#SBATCH --partition=standard
+#SBATCH --nodes=1
+#SBATCH --ntasks=39
+#SBATCH --ntasks-per-node=39
+#SBATCH --ntasks-per-core=1
+
+#module load cpe/21.03
+#module load cray-hdf5-parallel
+#module load cray-netcdf-hdf5parallel
+#export LD_LIBRARY_PATH=/work/ecseab13/shared/install/lib:${LD_LIBRARY_PATH}
+#export LD_LIBRARY_PATH=/opt/cray/pe/libsci/20.10.1.2/GNU/9.1/x86_64/lib:${LD_LIBRARY_PATH}
+
+#module -s restore /work/n01/shared/acc/n01_modules/ucx_env
+
+export OMP_NUM_THREADS=1
+#export MPI_DIR=/opt/cray/pe/mpich/8.1.3/ofi/gnu/9.1/lib-abi-mpich
+# Set the LD_LIBRARY_PATH environment variable within the Singularity container
+# to ensure that it used the correct MPI libraries
+#export SINGULARITYENV_LD_LIBRARY_PATH=/usr/lib:/lib/x86_64-linux-gnu:/opt/hdf5/install/lib:/opt/cray/pe/mpich/8.1.3/ofi/gnu/9.1/lib-abi-mpich:/opt/cray/pe/pmi/6.0.7/lib:/opt/cray/libfabric/1.11.0.0.233/lib64:/usr/lib64/host:
+
+export SINGULARITYENV_PREPEND_PATH=/usr/bin/host
+
+#export SINGULARITYENV_LD_LIBRARY_PATH=\
+#/opt/hdf5/install/lib:\
+#/opt/cray/pe/mpich/8.1.3/ofi/gnu/9.1/lib-abi-mpich:\
+#/usr/lib/x86_64-linux-gnu/libibverbs:\
+#/opt/cray/pe/pmi/6.0.7/lib:\
+#/opt/cray/libfabric/1.11.0.0.233/lib64
+
+#SINGULARITYENV_LD_LIBRARY_PATH=\
+#/opt/hdf5/install/lib:\
+#/opt/cray/pe/mpich/8.1.3/ofi/gnu/9.1/lib-abi-mpich:\
+#/usr/lib/x86_64-linux-gnu/libibverbs:\
+#/opt/cray/pe/pmi/6.0.7/lib:\
+#/opt/cray/libfabric/1.11.0.0.233/lib64:\
+#/usr/lib64/host:\
+#/lib/x86_64-linux-gnu:\
+#/.singularity.d/libs
+
+SINGULARITYENV_LD_LIBRARY_PATH=\
+/opt/cray/pe/hdf5-parallel/1.12.0.2/crayclang/9.1/lib:\
+/opt/cray/pe/mpich/8.1.3/ucx/cray/9.1/lib-abi-mpich:\
+/opt/cray/pe/pmi/6.0.7/lib:\
+/opt/cray/libfabric/1.11.0.0.233/lib64:\
+/usr/lib64/host:\
+
+#export SINGULARITYENV_LD_LIBRARY_PATH=\
+#/opt/libs:\
+#/usr/lib:\
+#/opt/mpi/install/lib:\
+#/lib/x86_64-linux-gnu:\
+#/opt/hdf5/install/lib:\
+#/opt/cray/pe/mpich/8.1.3/ofi/gnu/9.1/lib-abi-mpich:\
+#/opt/cray/pe/pmi/6.0.7/lib:\
+#/opt/cray/libfabric/1.11.0.0.233/lib64:\
+#/lib/x86_64-linux-gnu:\
+#/usr/lib64/host
+
+#export SINGULARITYENV_LD_LIBRARY_PATH=/opt/libs:/usr/lib:/opt/mpi/install/lib:/lib/x86_64-linux-gnu:/opt/hdf5/install/lib:/lib/x86_64-linux-gnu:
+
+
+# Set the options for the Singularity executable
+#   This makes sure the locations with Cray Slingshot interconnect libraries are available
+#singopts="-B /etc/libibverbs.d,/opt/cray,/usr/lib64:/usr/lib64/host,/usr/lib64/tcl,/var/spool/slurmd/mpi_cray_shasta"
+singopts="-B /etc/libibverbs.d,/opt/cray,/usr/lib64:/usr/lib64/host,/usr/lib64/tcl,/var/spool/slurmd/mpi_cray_shasta"
+
+#singopts="-B /etc/libibverbs.d,/opt/cray,/usr/lib64:/usr/lib64/host,/usr/lib64/tcl"
+
+
+# Set the LD_LIBRARY_PATH environment variable within the Singularity container
+# to ensure that it used the correct MPI libraries
+#singopts="-B /opt/cray,/usr/lib64:/usr/lib64/host,/usr/lib64/tcl,/var/spool/slurmd/mpi_cray_shasta"
+
+#===============================================================
+# LAUNCH JOB
+#===============================================================
+#    5x6        25      61x65
+#    7x8        47      45x49
+#  11x11        95      29x36
+#  14x16        184     22x26
+#  22x23        370     16x19
+#===============================================================
+echo `date` : Launch Job
+numactl --hardware
+
+sed "s/XXX_JPNI_XXX/11/g" EXP00/namelist_cfg_template > tmp_out
+sed "s/XXX_JPNJ_XXX/11/g"               tmp_out > EXP00/namelist_cfg
+
+#rm nemo.sif
+#ln -s nemo-mpich-O0.sif nemo.sif
+
+cat > myscript_wrapper.sh << EOFB
+#!/bin/ksh
+#
+#set -A map '--mca orte_base_help_aggregate 0 singularity run /work/ecseab13/ecseab13/jhcones/testing/sing3/nemo.sif xios EXP00' '--mca orte_base_help_aggregate 0 singularity run -B /etc/libibverbs.d /work/ecseab13/ecseab13/jhcones/testing/sing3/nemo.sif nemo EXP00'
+map[0]='singularity run /work/ecseab13/ecseab13/ccwcones/sing3/nemo.sif xios EXP00'
+map[1]='singularity run /work/ecseab13/ecseab13/ccwcones/sing3/nemo.sif nemo EXP00'
+
+exec_map=( 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 )
+#
+echo \${map[\${exec_map[\$SLURM_PROCID]}]}
+exec \${map[\${exec_map[\$SLURM_PROCID]}]}
+##
+EOFB
+chmod u+x ./myscript_wrapper.sh
+
+rm EXP00/file_def_nemo-oce.xml
+cd EXP00
+ln -s file_def_nemo-oce-M.xml file_def_nemo-oce.xml 
+cd ../
+
+srun hostname -s > hostfile
+#./build_rankfile -S 1 -s 16 -m 1 -C 6 -c 1 -H 1 -v > rankfile
+./build_rankfile -S 1 -s 16 -m 1 -C 95 -c 15 -H 1 -v > rankfile
+
+#export LD_LIBRARY_PATH=$MPI_DIR:/opt/hdf5/install/lib:/.singularity.d/libs:$LD_LIBRARY_PATH
+#export SINGULARITYENV_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+
+#singularity exec --cleanenv nemo.sif env
+
+echo '******************************'
+#singularity exec nemo.sif env
+
+srun --mpi=pmi2 --hint=nomultithread --mem-bind=local \
+--pack-group=0  --cpu-bind=v,mask_cpu:0x1,0x10000,0x40000,0x100000,0x400000,0x1000000,0x4000000,0x10000000,0x40000000,0x100000000,0x400000000,0x1000000000,0x4000000000,0x10000000000,0x40000000000,0x100000000000,0x400000000000,0x1000000000000,0x4000000000000,0x10000000000000,0x40000000000000,0x100000000000000,0x400000000000000,0x1000000000000000,0x4000000000000000,0x10000000000000000,0x40000000000000000,0x100000000000000000,0x400000000000000000,0x1000000000000000000,0x4000000000000000000,0x10000000000000000000,0x40000000000000000000,0x100000000000000000000,0x400000000000000000000,0x1000000000000000000000,0x4000000000000000000000,0x10000000000000000000000,0x40000000000000000000000,0x100000000000000000000000,0x400000000000000000000000,0x1000000000000000000000000,0x4000000000000000000000000,0x10000000000000000000000000,0x40000000000000000000000000,0x100000000000000000000000000,0x400000000000000000000000000,0x1000000000000000000000000000,0x4000000000000000000000000000,0x10000000000000000000000000000,0x40000000000000000000000000000,0x100000000000000000000000000000,0x400000000000000000000000000000,0x1000000000000000000000000000000,0x4000000000000000000000000000000,0x10000000000000000000000000000000,0x40000000000000000000000000000000 ./myscript_wrapper.sh \
+: --pack-group=1  --cpu-bind=v,mask_cpu:0x1,0x4,0x10,0x40,0x100,0x400,0x1000,0x4000,0x10000,0x40000,0x100000,0x400000,0x1000000,0x4000000,0x10000000,0x40000000,0x100000000,0x400000000,0x1000000000,0x4000000000,0x10000000000,0x40000000000,0x100000000000,0x400000000000,0x1000000000000,0x4000000000000,0x10000000000000,0x40000000000000,0x100000000000000,0x400000000000000,0x1000000000000000,0x4000000000000000,0x10000000000000000,0x40000000000000000,0x100000000000000000,0x400000000000000000,0x1000000000000000000,0x4000000000000000000,0x10000000000000000000 ./myscript_wrapper.sh
+
+
+#mpirun --oversubscribe -rf rankfile --report-bindings -v -np 1 --bind-to core singularity run /work/ecseab13/ecseab13/jhcones/testing/sing/nemo.sif xios EXP00 : -np 95 --bind-to core --mca btl_vader_single_copy_mechanism none --mca btl ^sm --mca btl_openib_allow_ib true --bind-to core singularity run /work/ecseab13/ecseab13/jhcones/testing/sing/nemo.sif nemo EXP00 
+
+
+# Tidy up
+
+#if [ ! -d TIMINGS ]; then
+#  mkdir TIMINGS
+#fi
+#mv EXP00/timing.output TIMINGS/timing.output.$SLURM_JOB_NAME
+#mv EXP00/ocean.output meta_out/ocean.output.$SLURM_JOB_NAME
+#if [ ! -d meta_out/"$SLURM_JOB_NAME" ]; then
+#  mkdir meta_out/$SLURM_JOB_NAME
+#fi
+#mv EXP00/slurm-* meta_out/$SLURM_JOB_NAME
+#if [ ! -d RESTARTS/"$SLURM_JOB_NAME" ]; then
+#  mkdir RESTARTS/$SLURM_JOB_NAME
+#fi
+#mv EXP00/*restart* RESTARTS/$SLURM_JOB_NAME
+#if [ ! -d OUTPUTS/"$SLURM_JOB_NAME" ]; then
+#  mkdir OUTPUTS/$SLURM_JOB_NAME
+#fi
+#mv EXP00/*_grid_* OUTPUTS/$SLURM_JOB_NAME
+
+# Daisy-chain?
+
+#sbatch runscript_2Xg_184N.slurm
