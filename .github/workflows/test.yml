@@ -19,9 +19,9 @@ jobs:
             Singularity.nemo
             input_files
             .github/workflows
-      - uses: eWaterCycle/setup-singularity@v6
+      - uses: eWaterCycle/setup-singularity@v7
         with:
-          singularity-version: 3.7.1
+          singularity-version: 3.8.3
       - name: Build the MPICH singularity container
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: |
