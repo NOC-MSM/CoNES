@@ -37,6 +37,8 @@ jobs:
                     if [ "$tag" == "Singularity" ]; then
                         tag=latest
                     fi
+                    # Get the baseOS
+                    wget http://gws-access.ceda.ac.uk/public/jmmp_collab/CoNES/nemo_baseOS_mpich_ucx.sif
                     # Build the container and name by tag
                     echo "Tag is $tag."
                     container="$repo:$tag.sif"
@@ -64,6 +66,8 @@ jobs:
                     if [ "$tag" == "Singularity" ]; then
                         tag=latest
                     fi
+                    # Get the baseOS
+                    wget http://gws-access.ceda.ac.uk/public/jmmp_collab/CoNES/nemo_baseOS_ompi_ucx.sif
                     # Build the container and name by tag
                     echo "Tag is $tag."
                     container="$repo:$tag.sif"
