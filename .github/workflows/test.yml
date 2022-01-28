@@ -59,3 +59,5 @@ jobs:
                     mv container.sif "$container"
                 else
                     echo "There was an issue building $container."          
+                fi
+            done
