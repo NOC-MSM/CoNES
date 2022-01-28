@@ -1,12 +1,12 @@
 Bootstrap: localimage
-From: nemo_baseOS_ompi_ucx.sif
+From: nemo_baseOS.sif
 
 ####
 ##
 ## Authors:      James Harle, National Oceanography Centre <jdha@noc.ac.uk>
 ## Authors:      Chris Wood, EPCC, University of Edinburgh <c.wood@epcc.ed.ac.uk>
 ## Date:         2021-11-30
-## Last updated: 2021-11-30
+## Last updated: 2022-01-28
 ##
 ## Definition file for building NEMO/XIOS Singularity Containers using MPICH
 ##
@@ -62,12 +62,14 @@ From: nemo_baseOS_ompi_ucx.sif
     chown -Rv nemo:nemo /opt
     
     # minimal possible permissions: directories executable; binaries read + executable (need to be readable to that library headers can be read!); everything else only readable for g+o
-    chmod -Rv 755 /opt
     #chmod -Rv 644 /opt
     #find /opt -type d -print0 | xargs -0 chmod -v 511
     #find /opt -type f -exec file -i {} + | grep ":[^:]*binary[^:]*$" |  sed 's/^\(.*\):[^:]*$/\1/' | xargs chmod -v 555
+    
+    # The above didn't seem to work so blanket chmod for time being 
+    chmod -Rv 755 /opt
 
-
+    # Clean up
     rm -rf /var/lib/apt/lists/* /var/lib/dpkg/info/*
 
 %environment
@@ -77,17 +79,9 @@ From: nemo_baseOS_ompi_ucx.sif
 %runscript
     #!/bin/bash
 
-    # This runscript will take 2 arguments: program to run (NEMO or XIOS), and an output directory. By default, the output directory will be the job id (passed using $SLURM_JOB_ID).    
-
-    # create directory so we can symlink to /nemo/nemo/cfgs/GYRE_PISCES/EXP00/
-    # we should allow an output directory, and manage this in a cleanup section of the batch script, before deleting the symlinked directory there
-
-    # Improvements:
-    #   - update when we use a generic cfg directory
-    #   - is using $SLURM_JOB_ID directly here best, or should we pass it as the 2nd argument to the script and use a more generic variable here?
-    #   - we could make the arguments a bit more intelligent; e.g.
-    #       - if only 1 argument, check whether it's nemo or xios; if neither then it's an output directory (and run nemo in attached mode)
-    #       - does the output directory need to be set for both 
+    # This runscript will take 2 arguments: program to run (NEMO or XIOS), and an 
+    # output directory. By default, the output directory will be the job id 
+    # (passed using $SLURM_JOB_ID).    
 
     if ! [[ $1 == "nemo" || $1 == "xios" ]]    
     then
@@ -118,9 +112,8 @@ From: nemo_baseOS_ompi_ucx.sif
     for file in /nemo/nemo/cfgs/NEMO/EXP00/*
     do
     
-        # check if the file is already symlinked to prevent lots of spurious error messages
-        # but, we have to create this linkfile variable: some of the nemo files are themselves symlinks, so the 
-        # if statement will fail to create a symlink for those if we just use the base path
+        # Check if the file is already symlinked to prevent lots of spurious 
+        # error messages
         
         linkfile=`basename $file`
 
@@ -144,7 +137,7 @@ From: nemo_baseOS_ompi_ucx.sif
     Version v0.0.1
 
 %help
-    The definition file used to build NEMO and XIOS with MPICH (3.4.2):
+    The definition file used to build NEMO and XIOS:
         - HDF5 (1.10.5)
         - NetCDF C (4.7.1) and Fortran (4.5.2) libraries
 
@@ -152,4 +145,4 @@ From: nemo_baseOS_ompi_ucx.sif
 
     To build the container, run
 
-        singularity build nemo_mpich_O0.sif Singularity.nemo_mpich_bootstrap
+        singularity build nemo_mpich.sif Singularity.nemo_mpich_bootstrap
