@@ -2,11 +2,15 @@
 [![Documentation Status](https://readthedocs.org/projects/cones/badge/?version=latest)](https://cones.readthedocs.io/en/latest/?badge=latest)
 
 ## Getting Started
-These instructions are based on those from [Singularity Deploy](https://github.com/singularityhub/singularity-deploy)
+The CoNES repository was templated from [Singularity Deploy](https://github.com/singularityhub/singularity-deploy)
 
-### 1. Write your Singularity Recipe(s)
+To generate a NEMO/XIOS Singularity Container please read the [documentaion](https://readthedocs.org/projects/cones/badge/?version=latest)](https://cones.readthedocs.io/en/latest/?badge=latest). What follows is a simplified quick-start guide:
 
-First, you should write your container recipe(s) in the present working directory.
+### 1. Fork and branch
+
+First, Fork the CoNES respository. 
+
+
 For good practice, when you are updating recipes you should checkout a new branch
 and open a pull request, as the repository comes with a workflow to trigger on a PR
 to [test your container build](.github/workflows/test.yml). Note that in the main workflow
