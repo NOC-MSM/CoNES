@@ -1,6 +1,9 @@
 MY_SRC=                        # If blank no need to do anything
 NEMO_VERSION=4.0.4             # Check that VERSION is 4.0.[2-6], 4.0_HEAD or trunk
 XIOS_REVISION=                 # Use default value if empty
-NEMO_COMPONENTS='OCE'
-CPP_KEYS=
-MPI=						   # Which MPI implementation to use; valid options are currently MPICH (which installs v) or OMPI (which installs v4.1.1)
+NEMO_COMPONENTS='OCE'          # Which NEMO components to build OCE/ICE/TOP etc
+CPP_KEYS=                      # Any additional compiler keys to include?
+MPI=MPICH                      # Which MPI implementation to use MPICH | OMPI
+                               # If empty and using GH actions, both will be built
+COMM=UCX                      # Which communication framework to use UCX | OFI
+                               # If empty and using GH actions, both will be built
