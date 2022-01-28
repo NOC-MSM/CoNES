@@ -31,18 +31,18 @@ jobs:
             build_arr=()
             if [ -z "$MPI" ] || [ "$MPI" = "MPICH" ]; then
                 if [ -z "$COMM" ] || [ "$COMM" = "UCX" ]; then
-                    build_arr+="mpich_ucx"
+                    build_arr+=("mpich_ucx")
                 fi
                 if [ -z "$COMM" ] || [ "$COMM" = "OFI" ]; then
-                    build_arr+="mpich_ofi"
+                    build_arr+=("mpich_ofi")
                 fi
             fi
             if [ -z "$MPI" ] || [ "$MPI" = "OMPI" ]; then
                 if [ -z "$COMM" ] || [ "$COMM" = "UCX" ]; then
-                    build_arr+="ompi_ucx"
+                    build_arr+=("ompi_ucx")
                 fi
                 if [ -z "$COMM" ] || [ "$COMM" = "OFI" ]; then
-                    build_arr+="ompi_ofi"
+                    build_arr+=("ompi_ofi")
                 fi
             fi
             # For each build choice, procude a SIF
