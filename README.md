@@ -4,7 +4,7 @@
 ## Getting Started
 The CoNES repository was templated from [Singularity Deploy](https://github.com/singularityhub/singularity-deploy)
 
-To generate a NEMO/XIOS Singularity Container please read the [documentaion](https://readthedocs.org/projects/cones/badge/?version=latest)](https://cones.readthedocs.io/en/latest/?badge=latest). What follows is a simplified quick-start guide:
+To generate a NEMO/XIOS Singularity Container please read the [documentaion](https://cones.readthedocs.io/en/latest/?badge=latest). What follows is a simplified quick-start guide:
 
 ### 1. Fork and branch
 
