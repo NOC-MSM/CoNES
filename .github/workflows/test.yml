@@ -29,27 +29,29 @@ jobs:
             . input_files/NEMO_in
             # Only build MPICH if required
             if [ -z "$MPI" ] || [ "$MPI" = "MPICH" ]; then
-                # For each Singularity* container, build based on the prefix (tag) 
-                for recipe in $(ls Singularity*); do
-                    echo "Building $recipe"
-                    tag=$(echo "${recipe/Singularity\./}")
-                    # If we find empty, use latest
-                    if [ "$tag" == "Singularity" ]; then
-                        tag=latest
-                    fi
-                    # Get the baseOS
-                    wget http://gws-access.ceda.ac.uk/public/jmmp_collab/CoNES/nemo_baseOS_mpich_ucx.sif
-                    # Build the container and name by tag
-                    echo "Tag is $tag."
-                    container="$repo:$tag.sif"
-                    SINGULARITYENV_MPI_SWAP=MPICH singularity build --fakeroot container.sif "$recipe"
-                    if [ "$?" == "0" ]; then
-                        echo "Successfully built container $container."                
-                        mv container.sif "$container"
-                    else
-                        echo "There was an issue building $container."          
-                    fi                
-                done
+                if [ -z "$COMM" ] || [ "$COMM" = "UCX" ]; then
+                    # For each Singularity* container, build based on the prefix (tag) 
+                    for recipe in $(ls Singularity*); do
+                        echo "Building $recipe"
+                        tag=$(echo "${recipe/Singularity\./}")
+                        # If we find empty, use latest
+                        if [ "$tag" == "Singularity" ]; then
+                            tag=latest
+                        fi
+                        # Get the baseOS
+                        wget http://gws-access.ceda.ac.uk/public/jmmp_collab/CoNES/nemo_baseOS_mpich_ucx.sif
+                        # Build the container and name by tag
+                        echo "Tag is $tag."
+                        container="$repo:$tag.sif"
+                        SINGULARITYENV_MPI_SWAP=MPICH singularity build --fakeroot container.sif "$recipe"
+                        if [ "$?" == "0" ]; then
+                            echo "Successfully built container $container."                
+                            mv container.sif "$container"
+                        else
+                            echo "There was an issue building $container."          
+                        fi                
+                    done
+                fi
             fi 
       - name: Build the openMPI singularity container
         if: steps.changed-files-specific.outputs.any_changed == 'true'
