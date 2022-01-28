@@ -47,7 +47,7 @@ jobs:
             fi
             # For each build choice, procude a SIF
             recipe="Singularity.nemo" # if more than one we could use `for recipe in $(ls Singularity*); do`
-            for build in "${build_arr[@]}"
+            for build in "${build_arr[@]}"; do
                 echo "Building $build"
                 # Get the baseOS
                 wget http://gws-access.ceda.ac.uk/public/jmmp_collab/CoNES/nemo_baseOS_"$build".sif -O nemo_baseOS.sif
