@@ -22,7 +22,7 @@ jobs:
       - uses: eWaterCycle/setup-singularity@v7
         with:
           singularity-version: 3.8.3
-      - name: Build the MPICH singularity container
+      - name: Build a singularity container
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: |
             repo=$(echo "${GITHUB_REPOSITORY/\//-}")
@@ -42,7 +42,7 @@ jobs:
                     build_arr+=("ompi_ucx")
                 fi
                 if [ -z "$COMM" ] || [ "$COMM" = "OFI" ]; then
-                    build_arr+=("ompi_ofi")
+                    echo "There is no openMPI OFI baseOS yet."          
                 fi
             fi
             # For each build choice, procude a SIF
