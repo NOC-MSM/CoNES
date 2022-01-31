@@ -48,7 +48,7 @@ by issuing the following:
    git clone git@github.com:NOC-MSM/HPC_Scaling_AMM7.git
    ./HPC_Scaling_AMM7/scripts/setup/amm7_setup_archer2 -w $RUN_DIR \
                                                        -r $WORK_DIR/HPC_Scaling_AMM7 \
-                                                       -m archer2 -S -O -v 4.0.4
+                                                       -m archer2 -S -v 4.0.4
 
 This will create a run directory, ``$RUN_DIR``, where the configuration files, runscripts
 and nemo SIF will be installed. On ARCHER2 singularity is available by default so there is no
@@ -59,8 +59,8 @@ This serves as the mount point for the SIF to read and write data. Any NEMO inpu
 namelists etc) need to be in this directory. All output from the simulation will also be written to 
 this directory.
 
-The above example sets up an openMPI ``-O`` configuration of NEMO. ARCHER2 also has the MPICH libraries 
-available which can be accessed using the following:
+The above example sets up an MPICH configuration of NEMO. It is possible to setup an openMPI ```-O```
+version. However, ARCHER2 doesn not have openMPI installed by default:
 
 .. code-block:: bash
 
@@ -69,7 +69,7 @@ available which can be accessed using the following:
    git clone git@github.com:NOC-MSM/HPC_Scaling_AMM7.git
    ./HPC_Scaling_AMM7/scripts/setup/amm7_setup_archer2 -w $RUN_DIR \
                                                        -r $WORK_DIR/HPC_Scaling_AMM7 \
-                                                       -m archer2 -S -v 4.0.4
+                                                       -m archer2 -S -O -v 4.0.4
 
 For a full set of options available in the ``amm7_setup_archer2`` issue the command:
 
