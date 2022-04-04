@@ -2,9 +2,6 @@ name: singularity-deploy
 
 on:
   push:
-    # This branch does not exist! You should update this to be your "production" branch
-    # and ensure that when you work on recipes you only merge to this branch when it's time to release
-    # You can also use another GitHub trigger entirely
     branches:
       - "main"
 
@@ -39,64 +36,50 @@ jobs:
           release_name: Release ${{ env.release_tag }}
           draft: false
           prerelease: false
-      - uses: eWaterCycle/setup-singularity@v6
+
+      - uses: eWaterCycle/setup-singularity@v7
         if: ${{ env.release_tag != env.latest_tag }}
         with:
-          singularity-version: 3.7.1
+          singularity-version: 3.8.3
       - name: Build the MPICH singularity container
         if: ${{ env.release_tag != env.latest_tag }}
         run: |
             repo=$(echo "${GITHUB_REPOSITORY/\//-}")
             . input_files/NEMO_in
-            # Only build MPICH if required
+            # Work out which builds are required
+            build_arr=()
             if [ -z "$MPI" ] || [ "$MPI" = "MPICH" ]; then
-                # For each Singularity* container, build based on the prefix (tag) 
-                for recipe in $(ls Singularity*); do
-                    echo "Building $recipe"
-                    tag=$(echo "${recipe/Singularity\./}")-mpich
-                    # If we find empty, use latest
-                    if [ "$tag" == "Singularity" ]; then
-                        tag=latest-mpich
-                    fi
-                    # Build the container and name by tag
-                    echo "Tag is $tag."
-                    container="$repo:$tag.sif"
-                    SINGULARITYENV_MPI_SWAP=MPICH singularity build --fakeroot container.sif "$recipe"
-                    if [ "$?" == "0" ]; then
-                        echo "Successfully built container $container."                
-                        mv container.sif "$container"
-                    else
-                        echo "There was an issue building $container."          
-                    fi                
-                done
-            fi 
-      - name: Build the OMPI singularity container
-        if: ${{ env.release_tag != env.latest_tag }}
-        run: |
-            repo=$(echo "${GITHUB_REPOSITORY/\//-}")
-            . input_files/NEMO_in
-            # Only build OMPI if required
+                if [ -z "$COMM" ] || [ "$COMM" = "UCX" ]; then
+                    build_arr+=("mpich_ucx")
+                fi
+                if [ -z "$COMM" ] || [ "$COMM" = "OFI" ]; then
+                    build_arr+=("mpich_ofi")
+                fi
+            fi
             if [ -z "$MPI" ] || [ "$MPI" = "OMPI" ]; then
-                # For each Singularity* container, build based on the prefix (tag) 
-                for recipe in $(ls Singularity*); do
-                    echo "Building $recipe"
-                    tag=$(echo "${recipe/Singularity\./}")-ompi
-                    # If we find empty, use latest
-                    if [ "$tag" == "Singularity" ]; then
-                        tag=latest-ompi
-                    fi
-                    # Build the container and name by tag
-                    echo "Tag is $tag."
-                    container="$repo:$tag.sif"
-                    SINGULARITYENV_MPI_SWAP=OMPI singularity build --fakeroot container.sif "$recipe"
-                    if [ "$?" == "0" ]; then
-                        echo "Successfully built container $container."                
-                        mv container.sif "$container"
-                    else
-                        echo "There was an issue building $container."          
-                    fi                
-                done
-            fi 
+                if [ -z "$COMM" ] || [ "$COMM" = "UCX" ]; then
+                    build_arr+=("ompi_ucx")
+                fi
+                if [ -z "$COMM" ] || [ "$COMM" = "OFI" ]; then
+                    echo "There is no openMPI OFI baseOS yet."          
+                fi
+            fi
+            # For each build choice, procude a SIF
+            recipe="Singularity.nemo" # if more than one we could use `for recipe in $(ls Singularity*); do`
+            for build in "${build_arr[@]}"; do
+                echo "Building $build"
+                # Get the baseOS
+                wget http://gws-access.ceda.ac.uk/public/jmmp_collab/CoNES/nemo_baseOS_"$build".sif -O nemo_baseOS.sif
+                # Build the container 
+                container="$repo:nemo-$build.sif"
+                singularity build --fakeroot container.sif "$recipe"
+                if [ "$?" == "0" ]; then
+                    echo "Successfully built container $container."                
+                    mv container.sif "$container"
+                else
+                    echo "There was an issue building $container."          
+                fi
+            done
       - name: Upload Release Assets
         if: ${{ env.release_tag != env.latest_tag }}
         env:
