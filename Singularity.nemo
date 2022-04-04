@@ -135,7 +135,17 @@ From: ubuntu:20.04
         rm mpich-3.4.2.tar.gz
         cd mpi
 
-        ./configure CC=gcc CXX=g++ FC=gfortran --prefix=/opt/mpi FFLAGS=-fallow-argument-mismatch --with-device=ch3:nemesis:ofi
+        cd /opt
+        mkdir ucx && cd ucx
+        wget https://github.com/openucx/ucx/releases/download/v1.11.2/ucx-1.11.2.tar.gz
+        rm v1.11.2.tar.gz 
+        tar xzf ucx-1.11.2.tar.gz
+        cd ucx-1.11.2
+        ./contrib/configure-release --prefix=$PWD/install
+        make && make install
+
+        ./configure CC=gcc CXX=g++ FC=gfortran --prefix=/opt/mpi2/install FFLAGS=-fallow-argument-mismatch --with-device=ch4:ucx --with-ucx=/opt/ucx/ucx-1.11.2/install
+
         make
         make install
 
@@ -235,7 +245,7 @@ From: ubuntu:20.04
 
     PATH=$PATH:/opt/mpi/bin:/opt/hdf5/install/bin
     LD_LIBRARY_PATH=/opt/hdf5/install/lib:$LD_LIBRARY_PATH
-   
+    
     cd $WORK_DIR
    
     chmod u+x /input_files/setup_nemo 
@@ -255,7 +265,7 @@ From: ubuntu:20.04
     cd $WORK_DIR
     
     mkdir /opt/nemo
-    mv /nemo/nemo/cfgs/NEMO/EXP00/nemo /opt/nemo/
+    c
 
     mkdir /opt/xios
     mv /nemo/nemo/cfgs/NEMO/EXP00/xios_server.exe /opt/xios/xios
