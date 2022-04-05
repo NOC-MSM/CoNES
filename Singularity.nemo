@@ -29,10 +29,12 @@ From: nemo_baseOS.sif
     cd $WORK_DIR
     chown nemo:nemo -R $WORK_DIR
 
-    PATH=$PATH:/opt/mpi/bin:/opt/hdf5/install/bin
+    PATH=$PATH:/opt/mpi/install/bin:/opt/hdf5/install/bin
     LD_LIBRARY_PATH=/opt/hdf5/install/lib:$LD_LIBRARY_PATH
-    
+   
     cd $WORK_DIR
+
+    . /input_files/NEMO_in
    
     chmod u+x /input_files/setup_nemo 
     /input_files/setup_nemo -x /nemo -w /nemo -s /nemo/AMM7_lite -m singularity -v $NEMO_VERSION -c gnu
@@ -51,7 +53,7 @@ From: nemo_baseOS.sif
     cd $WORK_DIR
     
     mkdir /opt/nemo
-    c
+    mv /nemo/nemo/cfgs/NEMO/EXP00/nemo /opt/nemo/
 
     mkdir /opt/xios
     mv /nemo/nemo/cfgs/NEMO/EXP00/xios_server.exe /opt/xios/xios
