@@ -41,8 +41,8 @@
 
 %CPP                 cpp -Dkey_nosignedzero -P -traditional
 %FC                  mpif90
-%FCFLAGS             -fdefault-double-8 -fdefault-real-8 -O0 -g  -funroll-all-loops -fcray-pointer -ffree-line-length-none -w -fallow-argument-mismatch
-%FFLAGS              -fdefault-double-8 -fdefault-real-8 -O0 -g  -funroll-all-loops -fcray-pointer -ffree-line-length-none -w -fallow-argument-mismatch
+%FCFLAGS             -fdefault-double-8 -fdefault-real-8 -O1 -funroll-all-loops -fcray-pointer -ffree-line-length-none -w -fallow-argument-mismatch
+%FFLAGS              -fdefault-double-8 -fdefault-real-8 -O1 -funroll-all-loops -fcray-pointer -ffree-line-length-none -w -fallow-argument-mismatch
 %LD                  /usr/bin/mpif90
 %FPPFLAGS            -P -traditional
 %LDFLAGS
