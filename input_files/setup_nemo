@@ -85,6 +85,8 @@ case "${NEMO_VER}"
            ;;
   4.0.6)   echo "NEMO Version 4.0.6 will be checked out"
            ;;
+  4.0.7)   echo "NEMO Version 4.0.6 will be checked out"
+           ;;
   trunk)   echo "NEMO trunk will be checked out"
            ;;
   *)       echo "NEMO Version not recognised"
@@ -145,10 +147,12 @@ case "${NEMO_VER}"
            ;;
   4.0.6)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
            ;;
+  4.0.7)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
+           ;;
   trunk)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
            ;;
   *)       echo "NEMO Version not recognised"
-           echo "Versions available: 4.0.2, 4.0.3, 4.0.4, 4.0.5, 4.0.6 and trunk"
+           echo "Versions available: 4.0.2, 4.0.3, 4.0.4, 4.0.5, 4.0.6, 4.0.7 and trunk"
            exit 1
 esac
 
