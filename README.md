@@ -1,4 +1,5 @@
-# Containerisation of NEMO Employing Singularity (CoNES)
+# Containerisation of NEMO Employing ~~Singularity~~ Apptainer (CoNEA?)
+# Apptainer*istaion* of NEMO (AoN?)
 [![Documentation Status](https://readthedocs.org/projects/cones/badge/?version=latest)](https://cones.readthedocs.io/en/latest/?badge=latest)
 
 ## Getting Started
