@@ -106,8 +106,9 @@ From: nemo_baseOS.sif
     then
         mkdir $results_dir
     fi 
-
+    echo "Results directory is: " $results_dir
     cd $results_dir
+    ls
 
     for file in /nemo/nemo/cfgs/NEMO/EXP00/*
     do
@@ -119,6 +120,7 @@ From: nemo_baseOS.sif
 
         if ! [[ -L $linkfile ]]
         then
+            echo $file $linkfile
             ln -s $file $linkfile
         fi
     done
