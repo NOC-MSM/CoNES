@@ -83,6 +83,8 @@ From: nemo_baseOS.sif
     # output directory. By default, the output directory will be the job id 
     # (passed using $SLURM_JOB_ID).    
 
+    echo $PWD
+    
     if ! [[ $1 == "nemo" || $1 == "xios" ]]    
     then
       echo "The program argument should be either 'nemo' or 'xios'"
@@ -109,7 +111,7 @@ From: nemo_baseOS.sif
     echo "Results directory is: " $results_dir
     cd $results_dir
     ls
-
+    echo $PWD
     for file in /nemo/nemo/cfgs/NEMO/EXP00/*
     do
     
@@ -124,8 +126,8 @@ From: nemo_baseOS.sif
             ln -s $file $linkfile
         fi
     done
-    
-
+    echo "done linking"
+    echo $PWD
     if [[ $1 == 'nemo' ]]
     then
         /opt/nemo/nemo
