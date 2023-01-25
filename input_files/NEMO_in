@@ -5,5 +5,5 @@ NEMO_COMPONENTS='OCE'          # Which NEMO components to build OCE/ICE/TOP etc
 CPP_KEYS=                      # Any additional compiler keys to include?
 MPI=MPICH                      # Which MPI implementation to use MPICH | OMPI
                                # If empty and using GH actions, both will be built
-COMM=UCX                      # Which communication framework to use UCX | OFI
+COMM=UCX                       # Which communication framework to use UCX | OFI
                                # If empty and using GH actions, both will be built
