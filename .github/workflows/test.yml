@@ -50,7 +50,7 @@ jobs:
             for build in "${build_arr[@]}"; do
                 echo "Building $build"
                 # Get the baseOS
-                wget http://gws-access.ceda.ac.uk/public/jmmp_collab/CoNES/nemo_baseOS_"$build".sif -O nemo_baseOS.sif
+                wget http://gws-access.ceda.ac.uk/public/jmmp/CoNES/nemo_baseOS_"$build".sif -O nemo_baseOS.sif
                 # Build the container 
                 container="$repo:nemo-$build.sif"
                 singularity build --fakeroot container.sif "$recipe"
