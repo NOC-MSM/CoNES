@@ -110,7 +110,7 @@ From: nemo_baseOS.sif
     fi 
     echo "Results directory is: " $results_dir
     cd $results_dir
-    ls
+  
     echo "We are in :" $PWD
     for file in /nemo/nemo/cfgs/NEMO/EXP00/*
     do
