@@ -46,7 +46,7 @@ jobs:
                 fi
             fi
             # For each build choice, procude a SIF
-            recipe="Singularity.nemo" # if more than one we could use `for recipe in $(ls Singularity*); do`
+            recipe="Singularity.nemo" # if more than one we could use: `for recipe in $(ls Singularity*); do`
             for build in "${build_arr[@]}"; do
                 echo "Building $build"
                 # Get the baseOS
