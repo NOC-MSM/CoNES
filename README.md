@@ -1,5 +1,4 @@
-# Containerisation of NEMO Employing ~~Singularity~~ Apptainer (CoNEA?)
-# Apptainer*istaion* of NEMO (AoN?)
+# Containerisation of NEMO Employing Singularity (CoNES)
 [![Documentation Status](https://readthedocs.org/projects/cones/badge/?version=latest)](https://cones.readthedocs.io/en/latest/?badge=latest)
 
 ## Getting Started
@@ -29,12 +28,18 @@ This workflow can easily be modified by altering:
 
 An individual NEMO SIF build can be created using the following steps: 
 
-- Fork the `CoNES` repository
-- Create a new branch
-- Edit the `VERSION` file to something approprate (e.g. 0.0.1)
-- Edit the `NEMO_in` namelist for NEMO version number, MPI choice etc.
-- Create a _Pull Request_ from that branch to main (at this point a test build will be triggered, which can take ~15 minutes per MPI build requested)
-- If successful the _merge_ will be available. Click merge and a NEMO SIF will be built and released under the _version_ specified. (again this can take ~15 minutes per MPI build requested)
+1. Fork the `CoNES` repository under `USER` account (main branch only is fine) \
+   Under the `Actions` tab enable workflows \
+   Under the `Settings` tab click through `actions` -> `general` and set `workflow permissions` to r+w and save \
+   Return to the `code` tab
+2. Create a new branch
+3. Edit the `VERSION` file to something approprate (e.g. 0.0.3)\
+   [Optional] Edit the `inputs/NEMO_in` namelist for NEMO version number, MPI choice etc.
+4. Create a _Pull Request_ from that branch to main. **Make sure this is from `USER/branch` to `USER/main` and not to `NOC-MSM/main`.**\
+   At this point a test build will be triggered, which can take ~15 minutes per MPI build requested
+5. If successful the _merge_ will be available. Click merge and ...
+6. A NEMO SIF will be built and released under the _version_ specified (again this can take ~15 minutes per MPI build requested).
+7. The NEMO SIF and asscoiated assets will appear under the `Releases` tab. 
 
 The branch can now either be deleted or held open for further changes to `NEMO_in` and subsequent releases.
 
