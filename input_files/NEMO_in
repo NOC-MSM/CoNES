@@ -1,5 +1,5 @@
 MY_SRC=                        # If blank no need to do anything
-NEMO_VERSION=4.0.4             # Check that VERSION is 4.0.[2-6], 4.0_HEAD or trunk
+NEMO_VERSION=4.0.6             # Check that VERSION is 4.0.[2-6], 4.0_HEAD or trunk
 XIOS_REVISION=                 # Use default value if empty
 NEMO_COMPONENTS='OCE'          # Which NEMO components to build OCE/ICE/TOP etc
 CPP_KEYS=                      # Any additional compiler keys to include?
