@@ -1,7 +1,7 @@
 MY_SRC=                        # If blank no need to do anything
 NEMO_VERSION=4.2.0             # Check that VERSION is 4.0.[2-6], 4.0_HEAD or trunk (all svn), or 4.2.0 (gitlab)
 XIOS_REVISION=                 # Use default value if empty
-NEMO_COMPONENTS='OCE'          # Which NEMO components to build OCE/ICE/TOP etc. Enter as list with spaces, E.g. 'NEMO OCE'
+NEMO_COMPONENTS='OCE'          # Which NEMO components to build OCE/ICE/TOP etc. Enter as list with spaces following cfg name, E.g. 'CFG_NAME OCE TOP'
 CPP_KEYS=                      # Any additional compiler keys to include?
 MPI=MPICH                      # Which MPI implementation to use MPICH | OMPI
                                # If empty and using GH actions, both will be built
