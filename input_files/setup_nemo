@@ -7,7 +7,7 @@ display_usage() {
    echo "  ***************************************"
    echo
    echo "  usage: ${0##*/} -w path_to_install_nemo -x path_to_intall_xios -s path_to_repo"
-   echo "                  -m machine -v version -c compiler -k components"
+   echo "                  -m machine -v version -c compiler -e components -k cpp_keys"
    echo
    echo "  flags:  -w full path to where nemo will be installed"
    echo "          -x full path to where xios will be installed"
@@ -15,7 +15,8 @@ display_usage() {
    echo "          -m machine on which to compile code"
    echo "          -v which version of NEMO to check out"
    echo "          -c which compiler to use"
-   echo "          -k which NEMO components to compile ('CFG_NAME OCE TOP etc')"
+   echo "          -e which NEMO components to compile ('CFG_NAME OCE TOP etc')"
+   echo "          -k which cpp keys to use"
    echo
    exit 1
 	} 
@@ -48,7 +49,8 @@ while getopts w:x:s:m:v:c:k: option
   m) export HPC_TARG=${OPTARG};;
   v) export NEMO_VER=${OPTARG};;
   c) export COMPILER=${OPTARG};;
-  k) export COMPONENTS=${OPTARG};;
+  e) export COMPONENTS=${OPTARG};;
+  k) export CPP_KEYS=${OPTARG};;
   esac
 done
 
@@ -191,7 +193,8 @@ cd $CONFIG_DIR
 tar xvfz /input_files/MY_SRC.tar.gz 
 
 # Need to put case $VERSION HERE
-echo "bld::tool::fppkeys key_mpp_mpi key_nosignedzero key_iomput" >  $CONFIG_DIR/cpp_NEMO.fcm
+#echo "bld::tool::fppkeys key_mpp_mpi key_nosignedzero key_iomput" >  $CONFIG_DIR/cpp_NEMO.fcm
+echo "bld::tool::fppkeys " $CPP_KEYS  >  $CONFIG_DIR/cpp_NEMO.fcm
 
 cd $WORK_DIR/nemo
 
