@@ -39,7 +39,7 @@ display_usage() {
 		exit 0
 	fi 
 
-while getopts w:x:s:m:v:c:k: option
+while getopts w:x:s:m:v:c:e:k: option
   do
   case "${option}"
   in
@@ -192,8 +192,8 @@ export CONFIG_DIR=$WORK_DIR/nemo/cfgs/NEMO
 cd $CONFIG_DIR
 tar xvfz /input_files/MY_SRC.tar.gz 
 
-# Need to put case $VERSION HERE
-#echo "bld::tool::fppkeys key_mpp_mpi key_nosignedzero key_iomput" >  $CONFIG_DIR/cpp_NEMO.fcm
+# Need to put case $VERSION HERE, OR OTHERWISE HANDLE THE WAYS KEYS CHANGE BETWEEN 4.0 and 4.2 ?
+#echo "bld::tool::fppkeys key_mpp_mpi key_nosignedzero key_iomput" >  $CONFIG_DIR/cpp_NEMO.fcm  ## 4.0
 echo "bld::tool::fppkeys " $CPP_KEYS  >  $CONFIG_DIR/cpp_NEMO.fcm
 
 cd $WORK_DIR/nemo
