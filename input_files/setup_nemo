@@ -49,8 +49,8 @@ while getopts w:x:s:m:v:c:e:k: option
   m) export HPC_TARG=${OPTARG};;
   v) export NEMO_VER=${OPTARG};;
   c) export COMPILER=${OPTARG};;
-  e) export COMPONENTS=${OPTARG};;
-  k) export CPP_KEYS=${OPTARG};;
+  e) export COMPONENTS="${OPTARG}";;
+  k) export CPP_KEYS="${OPTARG}";;
   esac
 done
 
