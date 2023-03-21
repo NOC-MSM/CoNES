@@ -87,14 +87,16 @@ case "${NEMO_VER}"
            ;;
   4.0.7)   echo "NEMO Version 4.0.6 will be checked out"
            ;;
+  4.2.0)   echo "NEMO Version 4.2.0 will be checked out"
+           ;;
   trunk)   echo "NEMO trunk will be checked out"
            ;;
   *)       echo "NEMO Version not recognised"
-           echo "Versions available: 4.0.2, 4.0.3, 4.0.4, 4.0.5, 4.0.6 and trunk"
+           echo "Versions available: 4.0.2, 4.0.3, 4.0.4, 4.0.5, 4.0.6 and svn trunk, and 4.2.0"
            exit 1
 esac
 
-# Checkout the NEMO code from the SVN Paris repository
+# Checkout the NEMO code from the SVN Paris repository for 4.0.x and from gitlab for 4.2.x
 echo "Checking out NEMO repository"
 case "${NEMO_VER}"
   in
@@ -103,24 +105,29 @@ case "${NEMO_VER}"
            svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/trunk/cfgs/SHARED nemo/cfgs/SHARED
            svn export http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/trunk/cfgs/ref_cfgs.txt nemo/cfgs/ref_cfgs.txt
            ;;
-  *)       svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER --depth empty nemo
+  4.0.?)   svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER --depth empty nemo
            svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER/src --depth infinity nemo/src
            svn co http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER/cfgs/SHARED nemo/cfgs/SHARED
            svn export http://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/r4.0/r$NEMO_VER/cfgs/ref_cfgs.txt nemo/cfgs/ref_cfgs.txt
            ;;
+  4.2.0)   git clone --branch 4.2.0 https://forge.nemo-ocean.eu/nemo/nemo.git nemo
 esac
 
 cd nemo
 
-# Now check EXTERNALS revision number before checking out the rest
-for ext_name in mk FCM IOIPSL
-  do
-  ext=`svn propget svn:externals | grep $ext_name | cut -c2-`
-  svn co http://forge.ipsl.jussieu.fr/nemo/svn/$ext
-done
+# Now SVN check EXTERNALS revision number (for 4.0.?) before checking out the rest
+case "${NEMO_VER}"
+  in
+  4.0.?)
+	for ext_name in mk FCM IOIPSL
+	  do
+	  ext=`svn propget svn:externals | grep $ext_name | cut -c2-`
+	  svn co http://forge.ipsl.jussieu.fr/nemo/svn/$ext
+	done
 
-ext=`svn propget svn:externals | grep makenemo | cut -c2-`
-svn export http://forge.ipsl.jussieu.fr/nemo/svn/$ext
+	ext=`svn propget svn:externals | grep makenemo | cut -c2-`
+	svn export http://forge.ipsl.jussieu.fr/nemo/svn/$ext
+esac
 
 mkdir arch
 
@@ -151,8 +158,10 @@ case "${NEMO_VER}"
            ;;
   trunk)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
            ;;
+  4.2.0)   svn co http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5@1964 xios
+           ;;
   *)       echo "NEMO Version not recognised"
-           echo "Versions available: 4.0.2, 4.0.3, 4.0.4, 4.0.5, 4.0.6, 4.0.7 and trunk"
+           echo "Versions available: 4.0.2, 4.0.3, 4.0.4, 4.0.5, 4.0.6, 4.0.7, svn trunk and 4.2.0"
            exit 1
 esac
 
