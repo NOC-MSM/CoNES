@@ -7,7 +7,7 @@ display_usage() {
    echo "  ***************************************"
    echo
    echo "  usage: ${0##*/} -w path_to_install_nemo -x path_to_intall_xios -s path_to_repo"
-   echo "                  -m machine -v version -c compiler"
+   echo "                  -m machine -v version -c compiler -k components"
    echo
    echo "  flags:  -w full path to where nemo will be installed"
    echo "          -x full path to where xios will be installed"
@@ -15,6 +15,7 @@ display_usage() {
    echo "          -m machine on which to compile code"
    echo "          -v which version of NEMO to check out"
    echo "          -c which compiler to use"
+   echo "          -k which NEMO components to compile ('CFG_NAME OCE TOP etc')"
    echo
    exit 1
 	} 
@@ -37,7 +38,7 @@ display_usage() {
 		exit 0
 	fi 
 
-while getopts w:x:s:m:v:c: option
+while getopts w:x:s:m:v:c:k: option
   do
   case "${option}"
   in
@@ -47,6 +48,7 @@ while getopts w:x:s:m:v:c: option
   m) export HPC_TARG=${OPTARG};;
   v) export NEMO_VER=${OPTARG};;
   c) export COMPILER=${OPTARG};;
+  k) export COMPONENTS=${OPTARG};;
   esac
 done
 
@@ -180,7 +182,8 @@ export XIOS_DIR=$XIOS_DIR/xios
 cd $WORK_DIR/nemo
 cp /input_files/arch/nemo/arch* ./arch
 
-echo 'NEMO OCE' >> $WORK_DIR/nemo/cfgs/work_cfgs.txt
+#echo 'NEMO OCE' >> $WORK_DIR/nemo/cfgs/work_cfgs.txt
+echo $COMPONENTS >> $WORK_DIR/nemo/cfgs/work_cfgs.txt
 
 export CONFIG_DIR=$WORK_DIR/nemo/cfgs/NEMO
 
