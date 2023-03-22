@@ -22,7 +22,8 @@ From: nemo_baseOS.sif
     input_files/arch/xios/arch-singularity.path /input_files/arch/xios/arch-singularity.path
 
 %post
-    
+ 
+
     . /input_files/NEMO_in
 
     WORK_DIR=/nemo >> $SINGULARITY_ENVIRONMENT
