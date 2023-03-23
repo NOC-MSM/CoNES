@@ -22,7 +22,8 @@ display_usage() {
 	} 
 # if less than 8 arguments supplied, display usage
 	if [  $# -le 16 ]
-	then 
+	then
+	  echo $#
 		display_usage
 		exit 1
 	fi 
