@@ -188,6 +188,7 @@ cp /input_files/arch/nemo/arch* ./arch
 
 #echo 'NEMO OCE' >> $WORK_DIR/nemo/cfgs/work_cfgs.txt
 echo $COMPONENTS >> $WORK_DIR/nemo/cfgs/work_cfgs.txt
+cat $WORK_DIR/nemo/cfgs/work_cfgs.txt
 
 export CONFIG_DIR=$WORK_DIR/nemo/cfgs/NEMO
 
@@ -197,6 +198,7 @@ tar xvfz /input_files/MY_SRC.tar.gz
 # Need to put case $VERSION HERE, OR OTHERWISE HANDLE THE WAYS KEYS CHANGE BETWEEN 4.0 and 4.2 ?
 #echo "bld::tool::fppkeys key_mpp_mpi key_nosignedzero key_iomput" >  $CONFIG_DIR/cpp_NEMO.fcm  ## 4.0
 echo "bld::tool::fppkeys " $CPP_KEYS  >  $CONFIG_DIR/cpp_NEMO.fcm
+cat $CONFIG_DIR/cpp_NEMO.fcm
 
 cd $WORK_DIR/nemo
 
