@@ -20,18 +20,19 @@ display_usage() {
    echo
    exit 1
 	} 
-# if less than three arguments supplied, display usage 
-	if [  $# -le 11 ] 
+# if less than 8 arguments supplied, display usage
+	if [  $# -le 16 ]
 	then 
 		display_usage
 		exit 1
 	fi 
-# if less than two arguments supplied, display usage 
-	if [  $# -ge 13 ] 
-	then 
-		display_usage
-		exit 1
-	fi 
+# THE FOLLOWING WOULD BE TRICKY TO IMPLEMENT AS MULTIPLE WORDS CAN EXIST IN cpp_keys and components
+# if less than two arguments supplied, display usage
+#	if [  $# -ge 13 ]
+#	then
+#		display_usage
+#		exit 1
+#	fi
 # check whether user had supplied -h or --help . If yes display usage 
 	if [[ ( $# == "--help") ||  $# == "-h" ]] 
 	then 
