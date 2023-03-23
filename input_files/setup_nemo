@@ -6,7 +6,7 @@ display_usage() {
    echo "  Auto-Config: NEMO in Singularity"
    echo "  ***************************************"
    echo
-   echo "  usage: ${0##*/} -w path_to_install_nemo -x path_to_intall_xios -s path_to_repo"
+   echo "  usage: ${0##*/} -w path_to_install_nemo -x path_to_install_xios -s path_to_repo"
    echo "                  -m machine -v version -c compiler -e components -k cpp_keys"
    echo
    echo "  flags:  -w full path to where nemo will be installed"
@@ -20,26 +20,26 @@ display_usage() {
    echo
    exit 1
 	} 
-# if less than 8 arguments supplied, display usage (2*8)
-	if [  $# -lt 16 ]
+# check whether user had supplied -h or --help . If yes display usage
+	if [[ ( $# == "--help") ||  $# == "-h" ]]
+	then
+		display_usage
+		exit 0
+	fi
+# if too few arguments supplied, display usage (count "minus" signs)
+	if [ echo $* | grep -o "-" | uniq -c | awk '{print $1}' -lt 8 ]
 	then
 	  echo $#
 		display_usage
 		exit 1
 	fi 
-# THE FOLLOWING WOULD BE TRICKY TO IMPLEMENT AS MULTIPLE WORDS CAN EXIST IN cpp_keys and components
-# if less than two arguments supplied, display usage
-#	if [  $# -ge 13 ]
-#	then
-#		display_usage
-#		exit 1
-#	fi
-# check whether user had supplied -h or --help . If yes display usage 
-	if [[ ( $# == "--help") ||  $# == "-h" ]] 
-	then 
+# if too many arguments supplied, display usage (count "minus" signs)
+	if [ echo $* | grep -o "-" | uniq -c | awk '{print $1}' -gt 8 ]
+	then
 		display_usage
-		exit 0
-	fi 
+		exit 1
+	fi
+
 
 while getopts w:x:s:m:v:c:e:k: option
   do
@@ -186,7 +186,7 @@ export XIOS_DIR=$XIOS_DIR/xios
 cd $WORK_DIR/nemo
 cp /input_files/arch/nemo/arch* ./arch
 
-#echo 'NEMO OCE' >> $WORK_DIR/nemo/cfgs/work_cfgs.txt
+# Add the configuration's list of modules to file
 echo "${COMPONENTS}" >> $WORK_DIR/nemo/cfgs/work_cfgs.txt
 
 export CONFIG_DIR=$WORK_DIR/nemo/cfgs/NEMO
@@ -194,7 +194,7 @@ export CONFIG_DIR=$WORK_DIR/nemo/cfgs/NEMO
 cd $CONFIG_DIR
 tar xvfz /input_files/MY_SRC.tar.gz 
 
-# Need to put case $VERSION HERE, OR OTHERWISE HANDLE THE WAYS KEYS CHANGE BETWEEN 4.0 and 4.2 ?
+# Set the compiler keys. Note that 4.0 and 4.2 have different keys
 #echo "bld::tool::fppkeys key_mpp_mpi key_nosignedzero key_iomput" >  $CONFIG_DIR/cpp_NEMO.fcm  ## 4.0
 echo "bld::tool::fppkeys ${CPP_KEYS}"  >  $CONFIG_DIR/cpp_NEMO.fcm
 
