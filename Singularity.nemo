@@ -37,7 +37,7 @@ From: nemo_baseOS.sif
     . /input_files/NEMO_in
    
     chmod u+x /input_files/setup_nemo 
-    /input_files/setup_nemo -x /nemo -w /nemo -s /nemo/AMM7_lite -m singularity -v $NEMO_VERSION -c gnu
+    /input_files/setup_nemo -x /nemo -w /nemo -s /nemo/AMM7_lite -m singularity -v $NEMO_VERSION -c gnu -e "${COMPONENTS}" -k "${CPP_KEYS}"
 
     cd /nemo/nemo/cfgs/NEMO/EXP00
     
